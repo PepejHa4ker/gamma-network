@@ -23,7 +23,7 @@ class GammaChatMessengerImpl(private val plugin: PapiPlugin) : GammaChatMessenge
     init {
         Bukkit.getMessenger().registerOutgoingPluginChannel(plugin, "chat:registerer")
         messenger = AbstractMessenger(
-            { channel, message -> trySendMessage(MessageData(channel, message), true) },
+            { channel, message -> trySendMessage(MessageData(channel, message), queued = true) },
             {
                 Log.info("Reg $it")
                 registerChannel(it, true)
@@ -87,7 +87,6 @@ class GammaChatMessengerImpl(private val plugin: PapiPlugin) : GammaChatMessenge
         val p = Players.all().firstOrNull()
         if (p != null) {
             queuedMessages.removeIf {
-                Log.info("Flush msg to ${it.channel}")
                 p.sendPluginMessage(plugin, it.channel, it.message)
                 true
             }

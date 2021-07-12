@@ -1,5 +1,6 @@
 package com.pepej.gammachat
 
+import com.pepej.gammachat.messages.AdminChatMessageSystem
 import com.pepej.gammachat.messages.PrivateMessageSystem
 import com.pepej.gammachat.messenger.GammaChatMessenger
 import com.pepej.gammachat.messenger.GammaChatMessengerImpl
@@ -40,21 +41,12 @@ class GammaChat : PapiJavaPlugin() {
         provideService(Messenger::class.java, globalMessenger)
         provideService(InstanceData::class.java, globalMessenger)
         provideService(Network::class.java, network)
-        messageSystem = PrivateMessageSystem(globalMessenger)
+        messageSystem = PrivateMessageSystem
         provideService(PrivateMessageSystem::class.java, messageSystem)
-        Commands.create()
-            .assertPlayer()
-            .assertUsage("<player> <message>")
-            .tabHandler {
-                network.onlinePlayers.values.map { it.name.get() }
-            }
-            .handler {
-                messageSystem.sendMessage(it.sender(), it.arg(0).parseOrFail(String::class.java), it.args().drop(1).joinToString(" "))
-            }
-            .registerAndBind(this, "ms", "msg", "сообщение")
-
         bindModule(FindCommandModule(network, arrayOf("find")))
         bindModule(NetworkStatusModule(network))
         bindModule(NetworkSummaryModule(network, globalMessenger, arrayOf("netsum", "online")))
+        bindModule(PrivateMessageSystem)
+        bindModule(AdminChatMessageSystem)
     }
 }
