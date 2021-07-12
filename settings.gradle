@@ -1,0 +1,4 @@
+rootProject.name = 'gamma-chat'
+include 'gamma-chat-bukkit'
+include 'gamma-chat-bungee'
+

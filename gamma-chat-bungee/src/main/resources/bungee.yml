@@ -1,0 +1,4 @@
+name: GammaChat
+author: pepej
+main: com.pepej.gammachat.GammaChatBungee
+version: 1.0.0

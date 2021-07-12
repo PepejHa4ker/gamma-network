@@ -1,0 +1,5 @@
+# Project exclude paths
+/.gradle/
+/gamma-chat-bukkit/build/
+/gamma-chat-bungee/build/
+/.idea/
