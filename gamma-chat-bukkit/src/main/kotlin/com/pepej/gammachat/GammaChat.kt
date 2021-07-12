@@ -12,6 +12,9 @@ import com.pepej.papi.messaging.Messenger
 import com.pepej.papi.network.Network
 import com.pepej.papi.network.event.NetworkEvent
 import com.pepej.papi.network.event.ServerConnectEvent
+import com.pepej.papi.network.modules.FindCommandModule
+import com.pepej.papi.network.modules.NetworkStatusModule
+import com.pepej.papi.network.modules.NetworkSummaryModule
 import com.pepej.papi.plugin.PapiJavaPlugin
 import com.pepej.papi.utils.Log
 
@@ -28,7 +31,7 @@ class GammaChat : PapiJavaPlugin() {
     lateinit var messageSystem: PrivateMessageSystem
     override fun onPluginLoad() {
         instance = this
-        serverId = this.server.serverId
+        serverId = loadConfig("config.yml").getString("server_id")
     }
 
     override fun onPluginEnable() {
@@ -49,5 +52,9 @@ class GammaChat : PapiJavaPlugin() {
                 messageSystem.sendMessage(it.sender(), it.arg(0).parseOrFail(String::class.java), it.args().drop(1).joinToString(" "))
             }
             .registerAndBind(this, "ms", "msg", "сообщение")
+
+        bindModule(FindCommandModule(network, arrayOf("find")))
+        bindModule(NetworkStatusModule(network))
+        bindModule(NetworkSummaryModule(network, globalMessenger, arrayOf("netsum", "online")))
     }
 }

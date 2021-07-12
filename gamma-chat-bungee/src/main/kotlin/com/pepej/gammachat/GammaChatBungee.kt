@@ -19,7 +19,6 @@ class GammaChatBungee : Plugin(), Listener {
 
     @EventHandler
     fun onPluginMessage(e: PluginMessageEvent) {
-        println(e.tag)
         if (e.tag == "chat:registerer") {
             val input = ByteStreams.newDataInput(e.data)
             val type = input.readUTF()
