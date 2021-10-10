@@ -1,0 +1,28 @@
+group 'com.pepej'
+version '1.0.0'
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:6.1.0'
+    }
+}
+
+apply plugin: "com.github.johnrengelman.shadow"
+apply plugin: 'kotlin-kapt'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven { url 'https://hub.spigotmc.org/nexus/content/groups/public/' }
+
+}
+
+dependencies {
+    implementation project(":gamma-network-api")
+    compileOnly("com.pepej:papi-core:2.6.0")
+    compileOnly("org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT")
+    kapt ("com.pepej:papi-core:2.6.0")
+}
+

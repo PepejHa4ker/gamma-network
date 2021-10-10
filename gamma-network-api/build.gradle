@@ -1,0 +1,15 @@
+group 'com.pepej'
+version '1.0.0'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    compileOnly("com.pepej:papi-core:2.6.0")
+}
+
+test {
+    useJUnitPlatform()
+}
