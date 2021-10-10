@@ -1,5 +1,7 @@
 # Project exclude paths
 /.gradle/
-/gamma-chat-bukkit/build/
-/gamma-chat-bungee/build/
 /.idea/
+# Project exclude paths
+/gamma-network-api/build/
+/gamma-network-bukkit/build/
+/gamma-network-hub/build/

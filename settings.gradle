@@ -1,4 +1,6 @@
-rootProject.name = 'gamma-chat'
-include 'gamma-chat-bukkit'
-include 'gamma-chat-bungee'
+rootProject.name = 'gamma-network'
+include 'gamma-network-bukkit'
+include 'gamma-network-api'
+include 'gamma-network-hub'
+
 

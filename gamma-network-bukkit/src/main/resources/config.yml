@@ -1,0 +1,4 @@
+server_id: ''
+address: "localhost"
+port: 6379
+password: ""

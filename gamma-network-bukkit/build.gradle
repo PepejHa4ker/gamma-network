@@ -1,0 +1,39 @@
+buildscript {
+    repositories {
+        jcenter()
+
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:6.1.0'
+    }
+}
+
+apply plugin: "com.github.johnrengelman.shadow"
+apply plugin: 'kotlin-kapt'
+
+
+repositories {
+    maven { url 'https://hub.spigotmc.org/nexus/content/groups/public/' }
+    maven { url 'https://libraries.minecraft.net' }
+    mavenCentral()
+    mavenLocal()
+
+}
+
+
+dependencies {
+    compileOnly("com.mojang:authlib:1.5.21")
+    compileOnly("com.pepej:papi-core:2.6.0")
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1'
+    implementation 'redis.clients:jedis:3.6.3'
+    implementation 'org.apache.commons:commons-pool2:2.10.0'
+    implementation project(":gamma-network-api")
+    compileOnly 'net.luckperms:api:5.3'
+
+//    implementation "ch.qos.logback:logback-classic:$logback_version"
+    compileOnly("org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT")
+    kapt ("com.pepej:papi-core:2.6.0")
+}
+
+
+
