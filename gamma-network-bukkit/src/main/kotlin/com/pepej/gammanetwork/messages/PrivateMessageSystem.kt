@@ -60,7 +60,7 @@ object PrivateMessageSystem  : TerminableModule {
     }
 
     override fun setup(consumer: TerminableConsumer) {
-        channel.newAgent { agent, message ->
+        channel.newAgent { _, message ->
             val reply = Schedulers.sync().supply {
                 val player = Bukkit.getPlayer(message.to) ?: return@supply null
 
@@ -74,7 +74,6 @@ object PrivateMessageSystem  : TerminableModule {
 
         Commands.create()
             .assertPlayer()
-            .assertUsage("<player> <message>")
             .tabHandler {
                 GammaNetwork.instance.network.onlinePlayers.values.map { it.name.get() }
             }

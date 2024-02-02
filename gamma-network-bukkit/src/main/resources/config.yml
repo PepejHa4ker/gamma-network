@@ -2,3 +2,9 @@ server_id: ''
 address: "localhost"
 port: 6379
 password: ""
+chat:
+  enable-splitting: true
+  local-server-chat-radius: 100
+  local-chat-format: "&a[L] {prefix}{username}{suffix}: {message}"
+  global-chat-format: "&6[G] {prefix}{username}{suffix}: {message}"
+  admin-message-color: "&c"
