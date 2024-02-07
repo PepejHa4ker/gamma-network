@@ -1,12 +1,13 @@
 package com.pepej.gammanetwork.redirect
 
-import com.google.common.collect.ImmutableMap
 import com.google.gson.JsonElement
 import com.pepej.gammanetwork.GammaNetwork.Companion.instance
 import com.pepej.papi.events.Events
 import com.pepej.papi.messaging.InstanceData
 import com.pepej.papi.messaging.Messenger
-import com.pepej.papi.messaging.conversation.*
+import com.pepej.papi.messaging.conversation.ConversationMessage
+import com.pepej.papi.messaging.conversation.ConversationReply
+import com.pepej.papi.messaging.conversation.ConversationReplyListener
 import com.pepej.papi.network.redirect.PlayerRedirector
 import com.pepej.papi.network.redirect.RedirectParameterProvider
 import com.pepej.papi.network.redirect.RedirectSystem
@@ -17,6 +18,7 @@ import com.pepej.papi.text.Text.colorize
 import net.jodah.expiringmap.ExpirationPolicy
 import net.jodah.expiringmap.ExpiringMap
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
@@ -27,8 +29,8 @@ class GammaNetworkRedirectSystem(
     private val redirector: PlayerRedirector
 ) :
     RedirectSystem {
-    private val channel =
-        messenger.getConversationChannel("network-redirect", RequestMessage::class.java, ResponseMessage::class.java)
+    private val channel = messenger.getConversationChannel("network-redirect", RequestMessage::class.java, ResponseMessage::class.java)
+    private val log = LoggerFactory.getLogger(GammaNetworkRedirectSystem::class.java)
 
 
     private val agent = channel.newAgent().apply {
@@ -36,7 +38,7 @@ class GammaNetworkRedirectSystem(
             if (!message.targetServer.equals(instanceData.id, true)) {
                 return@addListener ConversationReply.noReply()
             }
-            instance.logger.info("Received a message $message")
+            log.debug("Received a message {}", message)
             // call the handler
             val response = handler.handle(message)
 
@@ -57,7 +59,7 @@ class GammaNetworkRedirectSystem(
                     it.reason ?: "",
                     it.params
                 )
-                instance.logger.info("Sending response $resp")
+                log.debug("Sending response {}", resp)
                 resp
             })
         }
@@ -74,13 +76,13 @@ class GammaNetworkRedirectSystem(
         .handler {
             val response = expectedPlayers.remove(it.uniqueId)
             if (response == null || !response.isAllowed) {
-                instance.logger.info("Unable to process")
+                log.error("Unable to process player {} connection. Possible hacking attempt", it.name)
                 it.disallow(
                     AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST,
                     colorize("&cSorry! The server is unable to process your login at this time. (queue error)")
                 )
             }
-            instance.logger.info("Player ${it.uniqueId} joined via queue with params ${response?.params}")
+            log.info("Player ${it.uniqueId} joined via queue with params ${response?.params}")
         }
 
     private var handler: RequestHandler = AllowAllHandler()
@@ -101,19 +103,19 @@ class GammaNetworkRedirectSystem(
 
         for (defaultProvider in this.defaultParameters) {
             for ((key, value) in defaultProvider.provide(profile, serverId)) {
-                instance.logger.info("Putting value $value for key $key")
+                log.debug("Putting value {} for key {}", value, key)
                 req.params.putIfAbsent(key, value)
             }
         }
-        instance.logger.info("Builded a request parameters: ${req.params}")
+        log.debug("Built a request parameters: {}", req.params)
 
         val promise = Promise.empty<RedirectSystem.ReceivedResponse>()
 
-        instance.logger.info("Sending request $req")
+        log.debug("Sending request {}", req)
         // send req and await reply.
         channel.sendMessage(req, object : ConversationReplyListener<ResponseMessage> {
             override fun onReply(reply: ResponseMessage): ConversationReplyListener.RegistrationAction {
-                instance.logger.info("Got reply $reply")
+                log.debug("Got reply {}", reply)
                 if (reply.allowed) {
                     redirector.redirectPlayer(serverId, profile)
                 }

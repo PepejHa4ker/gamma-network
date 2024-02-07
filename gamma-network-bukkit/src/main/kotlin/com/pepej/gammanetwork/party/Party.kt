@@ -6,11 +6,13 @@ import java.util.*
 
 interface Party {
 
-    fun getOwner(): UUID
+    val id: UUID
 
-    fun getCreator(): UUID
+    val owner: UUID
 
-    fun getMembers(): List<UUID>
+    val creator: UUID
+
+    val members: List<UUID>
 
     /**
      * Transfers the party ownerships to the given profile.

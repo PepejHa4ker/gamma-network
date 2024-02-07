@@ -18,11 +18,14 @@ import com.pepej.papi.network.redirect.RedirectSystem
 import com.pepej.papi.network.redirect.RedirectSystem.Request
 import com.pepej.papi.network.redirect.RedirectSystem.RequestHandler
 import com.pepej.papi.promise.Promise
+import org.slf4j.LoggerFactory
 import java.lang.reflect.Type
 
 object GammaNetworkRequestHandler : RequestHandler {
+
+    private val log = LoggerFactory.getLogger(GammaNetworkRequestHandler::class.java)
     override fun handle(request: Request): Promise<RedirectSystem.Response> {
-        instance.logger.info("Handling request for profile ${request.profile} with params ${request.params}")
+        log.debug("Handling request for profile {} with params {}", request.profile, request.params)
         val metadata = Metadata.provideForPlayer(request.profile.uniqueId)
         val jsonElement: JsonElement? = request.params[CHAT.id]
         val chatType = GsonProvider.standard().fromJson(jsonElement, ChatType::class.java)

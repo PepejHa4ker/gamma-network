@@ -14,15 +14,15 @@ apply plugin: 'kotlin-kapt'
 
 repositories {
     mavenCentral()
-    mavenLocal()
     maven { url 'https://hub.spigotmc.org/nexus/content/groups/public/' }
+    maven { url "https://oss.squareland.ru/repository/minecraft"}
 
 }
 
 dependencies {
     implementation project(":gamma-network-api")
-    compileOnly("com.pepej:papi-core:2.6.0")
+    compileOnly("com.pepej:papi-core:2.6.1")
     compileOnly("org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT")
-    kapt ("com.pepej:papi-core:2.6.0")
+    kapt ("com.pepej:papi-core:2.6.1")
 }
 

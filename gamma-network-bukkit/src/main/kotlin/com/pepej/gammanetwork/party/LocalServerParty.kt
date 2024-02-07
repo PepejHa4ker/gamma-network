@@ -5,10 +5,11 @@ import com.pepej.papi.profiles.Profile
 import java.util.*
 
 class LocalServerParty(
+    id: UUID,
     creator: UUID,
-    _owner: UUID,
+    owner: UUID,
     members: MutableList<UUID> = mutableListOf()
-) : AbstractParty(creator, _owner, members) {
+) : AbstractParty(id, creator, owner, members) {
 
     override fun isMultiServerSupported(): Boolean {
         return false

@@ -10,30 +10,60 @@ buildscript {
 
 apply plugin: "com.github.johnrengelman.shadow"
 apply plugin: 'kotlin-kapt'
+apply plugin: 'maven-publish'
 
 
 repositories {
     maven { url 'https://hub.spigotmc.org/nexus/content/groups/public/' }
     maven { url 'https://libraries.minecraft.net' }
+    maven { url "https://oss.squareland.ru/repository/minecraft"}
+
     mavenCentral()
-    mavenLocal()
 
 }
 
 
 dependencies {
     compileOnly("com.mojang:authlib:1.5.21")
-    compileOnly("com.pepej:papi-core:2.6.0")
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1'
-    implementation 'redis.clients:jedis:3.6.3'
-    implementation 'org.apache.commons:commons-pool2:2.10.0'
+    compileOnly("com.pepej:papi-core:2.6.4")
+    compileOnly 'net.jodah:expiringmap:0.5.11'
+//    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1'
+    compileOnly 'ch.qos.logback:logback-classic:1.3.5'
+    compileOnly 'ch.qos.logback:logback-core:1.3.5'
+    testImplementation 'org.slf4j:slf4j-api:2.0.4'
+    compileOnly 'redis.clients:jedis:3.6.3'
+    compileOnly 'org.apache.commons:commons-pool2:2.10.0'
     implementation project(":gamma-network-api")
     compileOnly 'net.luckperms:api:5.3'
 
 //    implementation "ch.qos.logback:logback-classic:$logback_version"
     compileOnly("org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT")
-    kapt ("com.pepej:papi-core:2.6.0")
+    kapt ("com.pepej:papi-core:2.6.4")
 }
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = 'com.pepej'
+            version = '1.0.0'
+            artifactId = "gammanetwork-bukkit"
+
+            from(components["java"])
+        }
+    }
+
+    repositories {
+        maven {
+            name = "minecraft"
+            url = uri("https://oss.squareland.ru/repository/minecraft")
+            credentials {
+                username = "dev"
+                password = "XPzCnFqG93ZuWUA"
+
+            }
+        }
+    }
+}
+
 
 
 

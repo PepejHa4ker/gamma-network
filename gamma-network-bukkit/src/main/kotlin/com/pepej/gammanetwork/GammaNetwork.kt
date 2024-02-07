@@ -8,7 +8,6 @@ import com.pepej.gammanetwork.messages.AdminChatMessageSystem
 import com.pepej.gammanetwork.messages.GlobalChatMessageSystem
 import com.pepej.gammanetwork.messages.PrivateMessageSystem
 import com.pepej.gammanetwork.messenger.GammaChatMessengerImpl
-import com.pepej.gammanetwork.messenger.GammaChatNetwork
 import com.pepej.gammanetwork.messenger.redis.Redis
 import com.pepej.gammanetwork.messenger.redis.RedisCredentials
 import com.pepej.gammanetwork.messenger.redis.RedisProvider
@@ -19,9 +18,12 @@ import com.pepej.gammanetwork.redirect.VelocityPlayerRedirector
 import com.pepej.papi.ap.Plugin
 import com.pepej.papi.ap.PluginDependency
 import com.pepej.papi.command.Commands
+import com.pepej.papi.dependency.Dependencies
+import com.pepej.papi.dependency.Dependency
 import com.pepej.papi.messaging.InstanceData
 import com.pepej.papi.messaging.Messenger
 import com.pepej.papi.network.Network
+import com.pepej.papi.network.modules.DispatchModule
 import com.pepej.papi.network.modules.FindCommandModule
 import com.pepej.papi.network.modules.NetworkStatusModule
 import com.pepej.papi.network.modules.NetworkSummaryModule
@@ -39,15 +41,23 @@ import net.luckperms.api.LuckPermsProvider
         PluginDependency("papi"),
     ]
 )
+@Dependencies(
+    Dependency("ch.qos.logback:logback-classic:1.3.5"),
+    Dependency("ch.qos.logback:logback-core:1.3.5"),
+    Dependency("redis.clients:jedis:3.6.3"),
+    Dependency("org.apache.commons:commons-pool2:2.10.0"),
+    Dependency("net.jodah:expiringmap:0.5.11"),
+)
+
 class GammaNetwork : PapiJavaPlugin(), RedisProvider, InstanceData {
 
 
     private lateinit var _redis: Redis
 
-   override val redis: Redis
-   get() {
-       return _redis
-   }
+    override val redis: Redis
+        get() {
+            return _redis
+        }
 
     override fun getRedis(credentials: RedisCredentials): Redis {
         return GammaChatMessengerImpl(this, credentials)
@@ -56,16 +66,15 @@ class GammaNetwork : PapiJavaPlugin(), RedisProvider, InstanceData {
     private lateinit var _globalCredentials: RedisCredentials
 
     override val globalCredentials: RedisCredentials
-    get() {
-        return _globalCredentials
-    }
+        get() {
+            return _globalCredentials
+        }
 
     companion object {
         lateinit var instance: GammaNetwork
     }
 
     lateinit var serverId: String
-    lateinit var globalMessenger: GammaChatMessengerImpl
     lateinit var network: Network
     lateinit var configuration: GammaNetworkConfiguration
     override fun onPluginLoad() {
@@ -86,7 +95,7 @@ class GammaNetwork : PapiJavaPlugin(), RedisProvider, InstanceData {
             )
         )
         _globalCredentials = RedisCredentials.fromConfig(config)
-        globalMessenger = GammaChatMessengerImpl(this, globalCredentials )
+        GammaChatMessengerImpl(this, globalCredentials)
 
         this._redis = getRedis(this.globalCredentials);
         // expose all instances as services.
@@ -97,19 +106,21 @@ class GammaNetwork : PapiJavaPlugin(), RedisProvider, InstanceData {
         val redirectSystem = GammaNetworkRedirectSystem(this.redis, this, VelocityPlayerRedirector)
         redirectSystem.addDefaultParameterProvider(RedirectNetworkMetadataParameterProvider)
         redirectSystem.setHandler(GammaNetworkRequestHandler)
-        redirectSystem.setEnsure(true)
-        provideService(RedirectSystem::class.java,
+        redirectSystem.setEnsure(config.getBoolean("queue.ensure-joined-via"))
+        provideService(
+            RedirectSystem::class.java,
             redirectSystem
         )
         provideService(LuckPerms::class.java, LuckPermsProvider.get())
-        network = GammaChatNetwork(redis, this)
+        network = Network.create(redis, this)
         provideService(Network::class.java, network)
         this.redis.bindWith(this)
-         // initialization
+        // initialization
         ProfileArgumentParserRegistry.register(Commands.parserRegistry(), network)
         bindModule(FindCommandModule(network, arrayOf("find")))
         bindModule(NetworkStatusModule(network))
         bindModule(NetworkSummaryModule(network, this, arrayOf("netsum", "online")))
+        bindModule(DispatchModule(this.redis, this, arrayOf("dispatch", "exec")))
         bindModule(PrivateMessageSystem)
         bindModule(AdminChatMessageSystem)
         bindModule(GlobalChatMessageSystem)

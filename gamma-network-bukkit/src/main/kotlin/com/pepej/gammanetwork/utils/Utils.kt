@@ -11,6 +11,7 @@ import com.pepej.papi.profiles.Profile
 import com.pepej.papi.services.Services
 import com.pepej.papi.shadow.bukkit.player.CraftPlayerShadow
 import com.pepej.papi.utils.Players
+import org.bukkit.Location
 import org.bukkit.entity.Player
 
 inline fun <reified T> Messenger.getChannel(channel: String) = this.getChannel(channel, T::class.java)
@@ -29,6 +30,12 @@ inline fun <reified T> getServiceUnchecked(): T {
     return Services.getNullable(T::class.java)!!
 }
 inline fun <reified T> typeTokenOf() = object : TypeToken<T>() {}
+
+infix fun Location.distance(other: Location): Double {
+    return this.distance(other)
+}
+
+
 
 inline fun <reified T, reified R> Messenger.getConversationChannel(channel: String): ConversationChannel<T, R>
         where T : ConversationMessage, R : ConversationMessage {

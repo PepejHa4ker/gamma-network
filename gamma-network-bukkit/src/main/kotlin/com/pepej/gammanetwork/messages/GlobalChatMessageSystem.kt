@@ -2,6 +2,7 @@ package com.pepej.gammanetwork.messages
 
 import PlayerMessage
 import com.pepej.gammanetwork.GammaNetwork
+import com.pepej.gammanetwork.utils.distance
 import com.pepej.gammanetwork.utils.getChannel
 import com.pepej.gammanetwork.utils.getServiceUnchecked
 import com.pepej.gammanetwork.utils.metadata
@@ -76,9 +77,9 @@ object GlobalChatMessageSystem : TerminableModule {
                         message = colorize(config.adminMessageColor.format + message)
                     }
                     Players.all()
-                        .filter { recipient ->
-                            recipient.location.world.name == sender.location.world.name &&
-                                    recipient.location.distance(sender.location) < config.localChatRadius
+                        .filter { r ->
+                            r.location.world.name == sender.location.world.name &&
+                                    r.location distance sender.location < config.localChatRadius
                         }
                         .forEach { player -> player.sendMessage(colorize(
                             config.localFormat.format

@@ -3,18 +3,20 @@ package com.pepej.gammanetwork.party
 import com.pepej.gammanetwork.utils.getServiceUnchecked
 import com.pepej.papi.messaging.bungee.BungeeCord
 import com.pepej.papi.network.Server
+import com.pepej.papi.network.redirect.RedirectSystem
 import com.pepej.papi.profiles.Profile
 import com.pepej.papi.utils.Players
 import java.util.*
 
 class MultiServerParty(
+    id: UUID,
     creator: UUID,
-    _owner: UUID,
+    owner: UUID,
     members: MutableList<UUID> = mutableListOf(),
-) : AbstractParty(creator, _owner, members) {
+) : AbstractParty(id, creator, owner, members) {
 
     @Transient
-    private val bungeeCord = getServiceUnchecked<BungeeCord>()
+    private val redirectSystem = getServiceUnchecked<RedirectSystem>()
 
     override fun isMultiServerSupported(): Boolean {
         return true
@@ -23,9 +25,9 @@ class MultiServerParty(
     override fun onOwnerServerChange(server: Server) {
 
 
-        this.getMembers().mapNotNull(Players::getNullable)
+        this.members.mapNotNull(Players::getNullable)
             .forEach { p ->
-                bungeeCord.connect(p, server.id)
+                redirectSystem.redirectPlayer(server.id, p, mutableMapOf())
             }
     }
 }

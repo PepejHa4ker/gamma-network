@@ -62,7 +62,7 @@ object AdminChatMessageSystem : TerminableModule {
             }
             .registerAndBind(consumer, "a", "adm")
 
-        channel.newAgent { agent, message ->
+        channel.newAgent { _, message ->
             Schedulers.sync().run {
                 Bukkit.broadcast(colorize("&c[Admin-chat] &a[${message.server}] ${message.displayName}&f: ${message.message}"), "gammachat.notify")
             }

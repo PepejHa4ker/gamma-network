@@ -5,9 +5,10 @@ import com.pepej.papi.utils.Players
 import java.util.*
 
 abstract class AbstractParty(
-    private val creator: UUID,
-    private var owner: UUID,
-    private val members: MutableList<UUID> = mutableListOf()) : Party {
+    override val id: UUID,
+    override val creator: UUID,
+    override var owner: UUID,
+    override val members: MutableList<UUID> = mutableListOf()) : Party {
 
 
     override fun sendMessage(author: UUID, message: String) {
@@ -17,17 +18,6 @@ abstract class AbstractParty(
                it.sendMessage(colorize("&e[Party]&a${(" $authorName")}&6: &r$message")) }
     }
 
-    override fun getOwner(): UUID {
-        return owner
-    }
-
-    override fun getCreator(): UUID {
-        return creator
-    }
-
-    override fun getMembers(): List<UUID> {
-        return members
-    }
 
     override fun transferOwnership(to: UUID): Boolean {
         if (!isOwner(to)) {

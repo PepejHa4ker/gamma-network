@@ -96,7 +96,7 @@ object Parties : TerminableModule {
     }
 
     fun getParty(id: UUID): Party? {
-        return this.parties.find { id in it.getMembers() }
+        return this.parties.find { id in it.members }
     }
 
 
