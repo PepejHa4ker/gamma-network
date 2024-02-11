@@ -72,7 +72,9 @@ class GammaNetwork : PapiJavaPlugin(), KredsProvider, InstanceData {
         }
 
     override suspend fun getKreds(credentials: KredsCredentials): Kreds {
-        return GammaChatMessengerImpl.create(credentials)
+//        return runBlocking {
+            return GammaChatMessengerImpl.create(credentials)
+//        }
     }
 
     private lateinit var _globalCredentials: KredsCredentials
@@ -110,8 +112,6 @@ class GammaNetwork : PapiJavaPlugin(), KredsProvider, InstanceData {
         CoroutineScope(Dispatchers.Default).launch {
             _globalCredentials = KredsCredentials.fromConfig(config)
             _redis = getKreds(globalCredentials);
-
-
             // expose all instances as services.
             provideService(KredsProvider::class.java, this@GammaNetwork)
             provideService(KredsCredentials::class.java, globalCredentials)
@@ -144,7 +144,7 @@ class GammaNetwork : PapiJavaPlugin(), KredsProvider, InstanceData {
             bindModule(AdminChatMessageSystem)
             bindModule(GlobalChatMessageSystem)
             bindModule(NetworkCommands)
-            GammaNetworkApi().init()
+//            GammaNetworkApi().init()
 
 //        bindModule(Parties)
 //        bindModule(PartyCommand)

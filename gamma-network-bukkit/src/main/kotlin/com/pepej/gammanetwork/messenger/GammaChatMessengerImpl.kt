@@ -8,23 +8,19 @@ import com.pepej.papi.messaging.Channel
 import com.pepej.papi.terminable.composite.CompositeTerminable
 import com.pepej.papi.utils.Log
 import io.github.crackthecodeabhi.kreds.connection.*
-import kotlinx.coroutines.*
-import org.slf4j.LoggerFactory
-import redis.clients.jedis.JedisPool
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import java.util.function.BiConsumer
 import java.util.function.Consumer
-import kotlin.time.Duration.Companion.seconds
 
 
 class GammaChatMessengerImpl private constructor(
     private val messenger: AbstractMessenger,
     override var kredsClient: KredsClient?,
     private var kredsSubscriberClient: KredsSubscriberClient?,
-    private val channels: MutableSet<String> = mutableSetOf()
 ) : Kreds {
-
-    private val registry = CompositeTerminable.create()
-    private val log = LoggerFactory.getLogger(GammaChatMessengerImpl::class.java)
 
 
     companion object {
@@ -33,75 +29,45 @@ class GammaChatMessengerImpl private constructor(
 
         private suspend fun KredsClient.outgoingMessagesConsumer() = BiConsumer<String, ByteArray> { channel, message ->
             scope.launch {
-                JedisPool
-                this@outgoingMessagesConsumer.use {
-                    it.publish(channel, String(message, Charsets.UTF_8))
-                }
+                publish(channel, String(message))
+
             }
         }
 
-
-        private suspend fun KredsSubscriberClient.subscribeChannel(
-            channels: MutableSet<String>,
-        ) = Consumer<String> { channel ->
+        private suspend fun KredsSubscriberClient.subscribeChannel() = Consumer<String> { channel ->
             scope.launch {
-                this@subscribeChannel.use {
-                    channels.add(channel)
-                    it.subscribe(channel)
-                }
+                subscribe(channel)
             }
         }
 
-        private suspend fun KredsSubscriberClient.unSubscribeChannel(
-            channels: MutableSet<String>,
-        ) = Consumer<String> { channel ->
+        private suspend fun KredsSubscriberClient.unSubscribeChannel() = Consumer<String> { channel ->
             scope.launch {
-                this@unSubscribeChannel.use {
-                    channels.remove(channel)
-                    it.unsubscribe(channel)
-                }
+                unsubscribe(channel)
             }
         }
-
 
         suspend fun create(credentials: KredsCredentials): GammaChatMessengerImpl {
             val listener = PubSubListener()
             val kredsClient = newClient(Endpoint(credentials.address, credentials.port))
-            kredsClient.auth(credentials.password)
-
             val kredsSubscriberClient = scope.newSubscriberClient(Endpoint(credentials.address, credentials.port), listener)
-            kredsSubscriberClient.auth(credentials.password)
-            val channels = mutableSetOf<String>()
             val messenger = AbstractMessenger(
                 kredsClient.outgoingMessagesConsumer(),
-                kredsSubscriberClient.subscribeChannel(channels),
-                kredsSubscriberClient.unSubscribeChannel(channels)
+                kredsSubscriberClient.subscribeChannel(),
+                kredsSubscriberClient.unSubscribeChannel()
             )
             listener.messenger = messenger
-
-            val gammaChatMessengerImpl = GammaChatMessengerImpl(messenger, kredsClient, kredsSubscriberClient)
-            scope.launch {
-                while (gammaChatMessengerImpl.kredsSubscriberClient != null) {
-                    delay(2000)
-//                    gammaChatMessengerImpl.channels.forEach { channel ->
-//                        gammaChatMessengerImpl.kredsSubscriberClient?.subscribe(channel)
-//
-//                    }
-                }
-            }
-            return gammaChatMessengerImpl
-
+            return GammaChatMessengerImpl(messenger, kredsClient, kredsSubscriberClient)
         }
     }
 
     class PubSubListener(var messenger: AbstractMessenger? = null) : AbstractKredsSubscriber() {
 
         override fun onSubscribe(channel: String, subscribedChannels: Long) {
-            Log.info("Subscribed to channel: $channel")
+            Log.info("Subscribed to channel: $channel with channels $subscribedChannels")
         }
 
         override fun onUnsubscribe(channel: String, subscribedChannels: Long) {
-            Log.info("Unsubscribed from channel: $channel")
+            Log.info("Unsubscribed from channel: $channel with channels $subscribedChannels")
         }
 
         override fun onMessage(channel: String, message: String) {
@@ -126,8 +92,6 @@ class GammaChatMessengerImpl private constructor(
             kredsSubscriberClient?.close()
             kredsSubscriberClient = null
         }
-
-        this.registry.close();
     }
 
     override fun <T> getChannel(name: String, type: TypeToken<T>): Channel<T> {
