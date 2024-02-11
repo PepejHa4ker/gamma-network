@@ -13,11 +13,12 @@ import com.pepej.papi.network.redirect.RedirectSystem
 import com.pepej.papi.profiles.Profile
 import com.pepej.papi.terminable.TerminableConsumer
 import com.pepej.papi.terminable.module.TerminableModule
+import org.slf4j.LoggerFactory
 
 object NetworkCommands : TerminableModule {
 
     private val redirectSystem: RedirectSystem = getServiceUnchecked()
-    private val network: Network = getServiceUnchecked()
+    private val logger = LoggerFactory.getLogger(NetworkCommands::class.java)
 
     override fun setup(consumer: TerminableConsumer) {
         Commands.create()
@@ -29,29 +30,14 @@ object NetworkCommands : TerminableModule {
                 }
                 redirectSystem.redirectPlayer("Hub", ctx.sender(), mutableMapOf())
                     .thenAcceptAsync {
-                        instance.logger.info("Redirected with status ${it.status} reason ${it.reason} and params: ${it.params}}!")
+                        logger.debug(
+                            "Redirected with status {} reason {} and params: {}}!",
+                            it.status,
+                            it.reason,
+                            it.params
+                        )
                     }
             }
             .registerAndBind(consumer, "hub")
-
-        Commands.create()
-            .assertPermission("gammanetwork.commands.send")
-            .assertUsage("<server>")
-            .assertPlayer()
-            .tabHandler { network.servers.values.map { it.id } }
-            .handler { ctx ->
-//                val profile = ctx.arg(0).parseOrFail<Profile>()
-                val server = ctx.arg(0).parseOrFail<String>()
-//                val profileServer = network.servers.values.find { it.onlinePlayers.containsValue(profile) } ?: return@handler ctx.replyError("Игрок не найден")
-//                if (profileServer.id.equals(server, true)) {
-//                    ctx.replyError("Игрок уже на сервере!")
-//                    return@handler
-//                }
-                redirectSystem.redirectPlayer(server, ctx.sender(), mutableMapOf())
-                    .thenAcceptAsync {
-                        instance.logger.info("Redirected with status ${it.status} reason ${it.reason} and params: ${it.params}}!")
-                    }
-            }
-            .registerAndBind(consumer, "connect")
     }
 }

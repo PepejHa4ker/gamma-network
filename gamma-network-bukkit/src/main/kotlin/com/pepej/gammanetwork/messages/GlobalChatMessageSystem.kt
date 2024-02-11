@@ -48,8 +48,8 @@ object GlobalChatMessageSystem : TerminableModule {
         Events.subscribe(AsyncPlayerChatEvent::class.java)
             .filter { GammaNetwork.instance.configuration.chat.enableSplitting }
             .filter {
-                it.player.metadata().has(CHAT) && it.player.metadata()
-                    .getOrDefault(CHAT, ChatType.NOT_PRESENT) != ChatType.NOT_PRESENT
+                !it.player.metadata().has(CHAT)  // no chat key provided - default server chat
+                        || it.player.metadata().getOrDefault(CHAT, ChatType.NOT_PRESENT) == ChatType.NOT_PRESENT
             }
             .handler {
                 it.isCancelled = true

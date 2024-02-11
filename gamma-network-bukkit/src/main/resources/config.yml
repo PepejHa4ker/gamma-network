@@ -2,8 +2,6 @@ server_id: ''
 address: "localhost"
 port: 6379
 password: ""
-logging:
-
 chat:
   enable-splitting: true
   local-server-chat-radius: 100
@@ -12,3 +10,4 @@ chat:
   admin-message-color: "&c"
 queue:
   ensure-joined-via: false
+  connection-timeout: 10

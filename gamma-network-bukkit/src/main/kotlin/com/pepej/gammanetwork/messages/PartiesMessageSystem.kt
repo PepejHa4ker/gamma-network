@@ -87,7 +87,7 @@ object PartiesMessageSystem : TerminableModule {
         }
     }
 
-    class ChangeServerPartyAction(val targetServer: Server) : PartyAction() {
+    class ChangeServerPartyAction(private val targetServer: Server) : PartyAction() {
         override fun handleRequest(request: PartyRequest): PartyResponse? {
             val party = Parties.getParty(request.partyId) ?: return null
             party.onOwnerServerChange(targetServer)
@@ -101,7 +101,6 @@ object PartiesMessageSystem : TerminableModule {
         val request = PartyRequest(UUID.randomUUID(), actor, partyId, action, data)
         channel.sendMessage(request, object : ConversationReplyListener<PartyResponse> {
             override fun onReply(resp: PartyResponse): ConversationReplyListener.RegistrationAction {
-                instance.logger.info("Received reply: $resp")
                 return ConversationReplyListener.RegistrationAction.STOP_LISTENING
 
             }
