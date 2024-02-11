@@ -26,9 +26,9 @@ import java.util.concurrent.TimeUnit
 class GammaNetworkRedirectSystem(
     messenger: Messenger,
     private val instanceData: InstanceData,
-    private val redirector: PlayerRedirector
-) :
-    RedirectSystem {
+    private val redirector: PlayerRedirector,
+    private var connectionTimeout: Long = 5,
+) : RedirectSystem {
     private val channel = messenger.getConversationChannel("network-redirect", RequestMessage::class.java, ResponseMessage::class.java)
     private val log = LoggerFactory.getLogger(GammaNetworkRedirectSystem::class.java)
 
@@ -45,7 +45,7 @@ class GammaNetworkRedirectSystem(
             // process the redirect
             response.thenAcceptAsync { resp ->
                 if (!resp.isAllowed) {
-                    instance.logger.info("Not allowed")
+                    log.debug("Not allowed")
                     return@thenAcceptAsync
                 }
                 // add player to the expected players queue
@@ -66,7 +66,7 @@ class GammaNetworkRedirectSystem(
     }
 
     private val expectedPlayers = ExpiringMap.builder()
-        .expiration(5, TimeUnit.SECONDS)
+        .expiration(connectionTimeout, TimeUnit.SECONDS)
         .expirationPolicy(ExpirationPolicy.CREATED)
         .build<UUID, RedirectSystem.Response>()
 
@@ -77,12 +77,13 @@ class GammaNetworkRedirectSystem(
             val response = expectedPlayers.remove(it.uniqueId)
             if (response == null || !response.isAllowed) {
                 log.error("Unable to process player {} connection. Possible hacking attempt", it.name)
+                log.debug("Player {} is not allowed to connect with response: {}", it.name, response)
                 it.disallow(
                     AsyncPlayerPreLoginEvent.Result.KICK_WHITELIST,
                     colorize("&cSorry! The server is unable to process your login at this time. (queue error)")
                 )
             }
-            log.info("Player ${it.uniqueId} joined via queue with params ${response?.params}")
+            log.info("Player {} joined via queue with params {}", it.name, response?.params)
         }
 
     private var handler: RequestHandler = AllowAllHandler()

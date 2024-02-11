@@ -1,173 +1,142 @@
 package com.pepej.gammanetwork.messenger
 
 import com.google.common.reflect.TypeToken
-import com.pepej.gammanetwork.messenger.redis.Redis
-import com.pepej.gammanetwork.messenger.redis.RedisCredentials
+import com.pepej.gammanetwork.messenger.redis.Kreds
+import com.pepej.gammanetwork.messenger.redis.KredsCredentials
 import com.pepej.papi.messaging.AbstractMessenger
 import com.pepej.papi.messaging.Channel
-import com.pepej.papi.plugin.PapiPlugin
-import com.pepej.papi.scheduler.Schedulers
 import com.pepej.papi.terminable.composite.CompositeTerminable
 import com.pepej.papi.utils.Log
-import redis.clients.jedis.BinaryJedisPubSub
-import redis.clients.jedis.Jedis
+import io.github.crackthecodeabhi.kreds.connection.*
+import kotlinx.coroutines.*
+import org.slf4j.LoggerFactory
 import redis.clients.jedis.JedisPool
-import redis.clients.jedis.JedisPoolConfig
-import java.nio.charset.StandardCharsets
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.locks.ReentrantLock
-import javax.annotation.Nonnull
+import java.util.function.BiConsumer
+import java.util.function.Consumer
+import kotlin.time.Duration.Companion.seconds
 
 
-class GammaChatMessengerImpl(private val plugin: PapiPlugin, private val credentials: RedisCredentials) : Redis {
-    private var _jedisPool: JedisPool
-    override val jedisPool: JedisPool
-    get() {
-        return _jedisPool
-    }
-    override val jedis: Jedis
-    get() {
-        return _jedisPool.resource
-    }
-    private var messenger: AbstractMessenger
-    private val channels = mutableSetOf<String>()
+class GammaChatMessengerImpl private constructor(
+    private val messenger: AbstractMessenger,
+    override var kredsClient: KredsClient?,
+    private var kredsSubscriberClient: KredsSubscriberClient?,
+    private val channels: MutableSet<String> = mutableSetOf()
+) : Kreds {
+
     private val registry = CompositeTerminable.create()
-    private var listener: PubSubListener? = null
+    private val log = LoggerFactory.getLogger(GammaChatMessengerImpl::class.java)
 
 
-    init {
-        val config = JedisPoolConfig()
-        config.maxTotal = 128
-        _jedisPool = if (credentials.password.trim { it <= ' ' }.isEmpty()) {
-            JedisPool(config, credentials.address, credentials.port)
-        } else {
-            JedisPool(config, credentials.address, credentials.port, 2000, credentials.password)
+    companion object {
+
+        private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+        private suspend fun KredsClient.outgoingMessagesConsumer() = BiConsumer<String, ByteArray> { channel, message ->
+            scope.launch {
+                JedisPool
+                this@outgoingMessagesConsumer.use {
+                    it.publish(channel, String(message, Charsets.UTF_8))
+                }
+            }
         }
-        jedisPool.resource.use { jedis -> jedis.ping() }
 
-        Schedulers.async().run(object : Runnable {
-            private var broken = false
-            override fun run() {
-                if (broken) {
-                    Log.info("[papi-redis] Retrying subscription...")
-                    broken = false
-                }
-                jedis.use { jedis ->
-                    try {
-                        listener = PubSubListener()
-                        jedis.subscribe(
-                            listener,
-                            "papi-redis-dummy".toByteArray(StandardCharsets.UTF_8)
-                        )
-                    } catch (e: Exception) {
-                        // Attempt to unsubscribe this instance and try again.
-                        RuntimeException("Error subscribing to listener", e).printStackTrace()
-                        try {
-                            listener?.unsubscribe()
-                        } catch (ignored: Exception) {
-                        }
-                        listener = null
-                        broken = true
-                    }
-                }
-                if (broken) {
-                    // reschedule the runnable
-                    Schedulers.async().runLater(this, 1L)
+
+        private suspend fun KredsSubscriberClient.subscribeChannel(
+            channels: MutableSet<String>,
+        ) = Consumer<String> { channel ->
+            scope.launch {
+                this@subscribeChannel.use {
+                    channels.add(channel)
+                    it.subscribe(channel)
                 }
             }
-        })
+        }
 
-        Schedulers.async().runRepeating(Runnable {
-
-
-            if (listener == null || !(listener?.isSubscribed)!!) {
-                return@Runnable
-            }
-            for (channel in channels) {
-                listener?.subscribe(channel.toByteArray(StandardCharsets.UTF_8))
-            }
-        }, 2L, 2L).bindWith(registry)
-
-        messenger = AbstractMessenger(
-            { channel: String, message: ByteArray? ->
-                jedis.use { jedis ->
-                    jedis.publish(
-                        channel.toByteArray(StandardCharsets.UTF_8),
-                        message
-                    )
+        private suspend fun KredsSubscriberClient.unSubscribeChannel(
+            channels: MutableSet<String>,
+        ) = Consumer<String> { channel ->
+            scope.launch {
+                this@unSubscribeChannel.use {
+                    channels.remove(channel)
+                    it.unsubscribe(channel)
                 }
-            },
-            { channel: String ->
-                Log.info("[gamma-redis] Subscribing to channel: $channel")
-                channels.add(channel)
-                listener?.subscribe(channel.toByteArray(StandardCharsets.UTF_8))
             }
-        ) { channel: String ->
-            Log.info("[gamma-redis] Unsubscribing from channel: $channel")
-            channels.remove(channel)
-            listener?.unsubscribe(channel.toByteArray(StandardCharsets.UTF_8))
+        }
+
+
+        suspend fun create(credentials: KredsCredentials): GammaChatMessengerImpl {
+            val listener = PubSubListener()
+            val kredsClient = newClient(Endpoint(credentials.address, credentials.port))
+            kredsClient.auth(credentials.password)
+
+            val kredsSubscriberClient = scope.newSubscriberClient(Endpoint(credentials.address, credentials.port), listener)
+            kredsSubscriberClient.auth(credentials.password)
+            val channels = mutableSetOf<String>()
+            val messenger = AbstractMessenger(
+                kredsClient.outgoingMessagesConsumer(),
+                kredsSubscriberClient.subscribeChannel(channels),
+                kredsSubscriberClient.unSubscribeChannel(channels)
+            )
+            listener.messenger = messenger
+
+            val gammaChatMessengerImpl = GammaChatMessengerImpl(messenger, kredsClient, kredsSubscriberClient)
+            scope.launch {
+                while (gammaChatMessengerImpl.kredsSubscriberClient != null) {
+                    delay(2000)
+//                    gammaChatMessengerImpl.channels.forEach { channel ->
+//                        gammaChatMessengerImpl.kredsSubscriberClient?.subscribe(channel)
+//
+//                    }
+                }
+            }
+            return gammaChatMessengerImpl
+
         }
     }
 
+    class PubSubListener(var messenger: AbstractMessenger? = null) : AbstractKredsSubscriber() {
 
-    override fun <T> getChannel(name: String, @Nonnull type: TypeToken<T>): Channel<T> {
-        return messenger.getChannel(name, type)
+        override fun onSubscribe(channel: String, subscribedChannels: Long) {
+            Log.info("Subscribed to channel: $channel")
+        }
+
+        override fun onUnsubscribe(channel: String, subscribedChannels: Long) {
+            Log.info("Unsubscribed from channel: $channel")
+        }
+
+        override fun onMessage(channel: String, message: String) {
+            try {
+                messenger?.registerIncomingMessage(channel, message.toByteArray())
+            } catch (e: Exception) {
+                Log.severe("Exception during processing message {} on channel {}", message, channel, e)
+            }
+        }
+
+        override fun onException(ex: Throwable) {
+            Log.severe("Exception during listening redis", ex)
+        }
     }
 
     override fun close() {
-        if (listener != null) {
-            listener?.unsubscribe()
-            listener = null
+        if (kredsClient != null) {
+            kredsClient?.close()
+            kredsClient = null
         }
-        jedisPool.close()
-        registry.close()
+        if (kredsSubscriberClient != null) {
+            kredsSubscriberClient?.close()
+            kredsSubscriberClient = null
+        }
+
+        this.registry.close();
     }
 
-    private inner class PubSubListener : BinaryJedisPubSub() {
-        private val lock = ReentrantLock()
-        private val subscribed: MutableSet<String> = ConcurrentHashMap.newKeySet()
-        override fun subscribe(vararg channels: ByteArray) {
-            lock.lock()
-            try {
-                for (channel in channels) {
-                    val channelName = String(channel, StandardCharsets.UTF_8)
-                    if (subscribed.add(channelName)) {
-                        super.subscribe(channel)
-                    }
-                }
-            } finally {
-                lock.unlock()
-            }
-        }
-
-        override fun unsubscribe(vararg channels: ByteArray) {
-            lock.lock()
-            try {
-                super.unsubscribe(*channels)
-            } finally {
-                lock.unlock()
-            }
-        }
-
-        override fun onSubscribe(channel: ByteArray, subscribedChannels: Int) {
-            Log.info("[gamma-redis] Subscribed to channel: " + String(channel, StandardCharsets.UTF_8))
-        }
-
-        override fun onUnsubscribe(channel: ByteArray, subscribedChannels: Int) {
-            val channelName = String(channel, StandardCharsets.UTF_8)
-            Log.info("[gamma-redis] Unsubscribed from channel: $channelName")
-            subscribed.remove(channelName)
-        }
-
-        override fun onMessage(channel: ByteArray, message: ByteArray) {
-            val channelName = String(channel, StandardCharsets.UTF_8)
-            try {
-                messenger.registerIncomingMessage(channelName, message)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
+    override fun <T> getChannel(name: String, type: TypeToken<T>): Channel<T> {
+        return messenger.getChannel(name, type)
     }
-
 }
+
+
+
+
+
 
