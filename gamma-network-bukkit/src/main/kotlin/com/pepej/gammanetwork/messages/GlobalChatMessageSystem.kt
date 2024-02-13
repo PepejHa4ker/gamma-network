@@ -46,51 +46,55 @@ object GlobalChatMessageSystem : TerminableModule {
                 )
             }.bindWith(consumer)
         Events.subscribe(AsyncPlayerChatEvent::class.java)
-            .filter { GammaNetwork.instance.configuration.chat.enableSplitting }
-            .filter {
-                !it.player.metadata().has(CHAT)  // no chat key provided - default server chat
-                        || it.player.metadata().getOrDefault(CHAT, ChatType.NOT_PRESENT) == ChatType.NOT_PRESENT
-            }
+            .filter { GammaNetwork.instance.configuration.chat.enable }
+            .filter { !it.player.metadata().has(CHAT) || it.player.metadata().getOrDefault(CHAT, ChatType.NOT_PRESENT) == ChatType.NOT_PRESENT }
             .handler {
                 it.isCancelled = true
                 var message = it.message
                 val sender = it.player
                 val luckPermsUser = luckPerms.userManager.getUser(sender.uniqueId) ?: return@handler
                 val metadata = luckPermsUser.cachedData.metaData
-                if (message.isNotEmpty() && message.first() == '!') {
-                    message = message.substring(1)
-                    if (sender.hasPermission("gammachat.chat.admin")) {
-                        message = colorize(config.adminMessageColor.format + message)
-                    }
-                    Players.all()
-                        .forEach { p -> p.sendMessage(colorize(
-                            config.globalFormat.format
-                                .replace("{suffix}", metadata.suffix ?: "")
-                                .replace("{prefix}", metadata.prefix ?: "")
-                                .replace("{username}", sender.name)
-                        )
-                            .replace("{message}", message))
-
+                if (sender.hasPermission("gammachat.chat.admin")) {
+                    message = colorize(config.adminMessageColor.format + message)
+                }
+                if (GammaNetwork.instance.configuration.chat.enableSplitting) {
+                    if (message.isNotEmpty() && message.first() == '!') {
+                        message = message.substring(1)
+                        if (sender.hasPermission("gammachat.chat.admin")) {
+                            message = colorize(config.adminMessageColor.format + message)
                         }
-                } else {
-                    if (sender.hasPermission("gammachat.chat.admin")) {
-                        message = colorize(config.adminMessageColor.format + message)
+                        Players.all()
+                            .forEach { p ->
+                                p.sendMessage(
+                                    colorize(
+                                        config.globalFormat.format
+                                            .replace("{suffix}", metadata.suffix ?: "")
+                                            .replace("{prefix}", metadata.prefix ?: "")
+                                            .replace("{username}", sender.name)
+                                    )
+                                        .replace("{message}", message)
+                                )
+
+                            }
+                    } else {
+                        Players.all()
+                            .filter { r ->
+                                r.location.world.name == sender.location.world.name &&
+                                        r.location distance sender.location < config.localChatRadius
+                            }
+                            .forEach { player ->
+                                player.sendMessage(
+                                    colorize(
+                                        config.localFormat.format
+                                            .replace("{suffix}", metadata.suffix ?: "")
+                                            .replace("{prefix}", metadata.prefix ?: "")
+                                            .replace("{username}", sender.name)
+                                    )
+                                        .replace("{message}", message)
+                                )
+                            }
+
                     }
-                    Players.all()
-                        .filter { r ->
-                            r.location.world.name == sender.location.world.name &&
-                                    r.location distance sender.location < config.localChatRadius
-                        }
-                        .forEach { player -> player.sendMessage(colorize(
-                            config.localFormat.format
-                                .replace("{suffix}", metadata.suffix ?: "")
-                                .replace("{prefix}", metadata.prefix ?: "")
-                                .replace("{username}", sender.name)
-                        )
-                            .replace("{message}", message)) }
-
-
-
                 }
 
             }.bindWith(consumer)
@@ -112,7 +116,8 @@ object GlobalChatMessageSystem : TerminableModule {
                     )
 
                 } else {
-                    val isInGlobalChat = it.sender().metadata().has(CHAT) && it.sender().metadata().getOrDefault(CHAT, ChatType.NOT_PRESENT) == ChatType.GLOBAL
+                    val isInGlobalChat = it.sender().metadata().has(CHAT) && it.sender().metadata()
+                        .getOrDefault(CHAT, ChatType.NOT_PRESENT) == ChatType.GLOBAL
 
                     if (!isInGlobalChat) {
                         it.sender().metadata().put(CHAT, ChatType.GLOBAL)
