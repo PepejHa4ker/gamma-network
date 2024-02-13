@@ -5,18 +5,14 @@ import com.pepej.gammanetwork.messenger.redis.Kreds
 import com.pepej.gammanetwork.messenger.redis.KredsCredentials
 import com.pepej.papi.messaging.AbstractMessenger
 import com.pepej.papi.messaging.Channel
-import com.pepej.papi.terminable.composite.CompositeTerminable
 import com.pepej.papi.utils.Log
 import io.github.crackthecodeabhi.kreds.connection.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.function.BiConsumer
 import java.util.function.Consumer
 
 
-class GammaChatMessengerImpl private constructor(
+class GammaNetworkMessenger private constructor(
     private val messenger: AbstractMessenger,
     override var kredsClient: KredsClient?,
     private var kredsSubscriberClient: KredsSubscriberClient?,
@@ -29,7 +25,8 @@ class GammaChatMessengerImpl private constructor(
 
         private suspend fun KredsClient.outgoingMessagesConsumer() = BiConsumer<String, ByteArray> { channel, message ->
             scope.launch {
-                publish(channel, String(message))
+                val msg = String(message)
+                publish(channel, msg)
 
             }
         }
@@ -46,21 +43,28 @@ class GammaChatMessengerImpl private constructor(
             }
         }
 
-        suspend fun create(credentials: KredsCredentials): GammaChatMessengerImpl {
-            val listener = PubSubListener()
-            val kredsClient = newClient(Endpoint(credentials.address, credentials.port))
-            val kredsSubscriberClient = scope.newSubscriberClient(Endpoint(credentials.address, credentials.port), listener)
+        suspend fun create(credentials: KredsCredentials): GammaNetworkMessenger = scope.async {
+            val endpoint = Endpoint(credentials.address, credentials.port)
+            val kredsClient = newClient(endpoint)
+            val password = credentials.password
+            kredsClient.auth(password)
+            val kredsClientConfig =
+                KredsClientConfig.Builder(readTimeoutSeconds = KredsClientConfig.NO_READ_TIMEOUT).build()
+            val kredsSubscriberClient = newSubscriberClient(endpoint, PubSubListener, kredsClientConfig, null, password)
+            kredsSubscriberClient.auth(null, password)
             val messenger = AbstractMessenger(
                 kredsClient.outgoingMessagesConsumer(),
                 kredsSubscriberClient.subscribeChannel(),
                 kredsSubscriberClient.unSubscribeChannel()
             )
-            listener.messenger = messenger
-            return GammaChatMessengerImpl(messenger, kredsClient, kredsSubscriberClient)
-        }
+            PubSubListener.messenger = messenger
+            GammaNetworkMessenger(messenger, kredsClient, kredsSubscriberClient)
+        }.await()
+
     }
 
-    class PubSubListener(var messenger: AbstractMessenger? = null) : AbstractKredsSubscriber() {
+    private object PubSubListener : AbstractKredsSubscriber() {
+         var messenger: AbstractMessenger? = null
 
         override fun onSubscribe(channel: String, subscribedChannels: Long) {
             Log.info("Subscribed to channel: $channel with channels $subscribedChannels")
@@ -84,14 +88,15 @@ class GammaChatMessengerImpl private constructor(
     }
 
     override fun close() {
-        if (kredsClient != null) {
-            kredsClient?.close()
-            kredsClient = null
-        }
         if (kredsSubscriberClient != null) {
             kredsSubscriberClient?.close()
             kredsSubscriberClient = null
         }
+        if (kredsClient != null) {
+            kredsClient?.close()
+            kredsClient = null
+        }
+
     }
 
     override fun <T> getChannel(name: String, type: TypeToken<T>): Channel<T> {

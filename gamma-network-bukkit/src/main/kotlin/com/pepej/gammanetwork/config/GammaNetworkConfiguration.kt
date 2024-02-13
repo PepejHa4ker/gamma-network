@@ -1,13 +1,13 @@
 package com.pepej.gammanetwork.config
 
-import org.bukkit.configuration.ConfigurationSection
-
 
 data class ChatConfiguration(
     val enableSplitting: Boolean,
+    val enable: Boolean,
     val localChatRadius: Int,
     val localFormat: Format,
     val globalFormat: Format,
+//    val genericFormat: Format,
     val adminMessageColor: Format,
 ) {
     @JvmInline

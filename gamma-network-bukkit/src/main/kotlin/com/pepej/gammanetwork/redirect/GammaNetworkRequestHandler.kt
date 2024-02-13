@@ -26,14 +26,19 @@ object GammaNetworkRequestHandler : RequestHandler {
     private val log = LoggerFactory.getLogger(GammaNetworkRequestHandler::class.java)
     override fun handle(request: Request): Promise<RedirectSystem.Response> {
         log.debug("Handling request for profile {} with params {}", request.profile, request.params)
+        extractMetadata(request)
+        return Promise.completed(RedirectSystem.Response(true, "Redirect via network", request.params))
+
+    }
+
+    private fun extractMetadata(request: Request) {
+        log.debug("Extracting metadata for request {}", request)
         val metadata = Metadata.provideForPlayer(request.profile.uniqueId)
         val jsonElement: JsonElement? = request.params[CHAT.id]
         val chatType = GsonProvider.standard().fromJson(jsonElement, ChatType::class.java)
         if (chatType != null) {
             metadata.put(CHAT, chatType)
         }
-        return Promise.completed(RedirectSystem.Response(true, "Redirect via network", request.params))
-
     }
 
 

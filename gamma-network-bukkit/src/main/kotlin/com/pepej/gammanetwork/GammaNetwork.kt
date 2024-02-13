@@ -7,7 +7,7 @@ import com.pepej.gammanetwork.config.GammaNetworkConfiguration
 import com.pepej.gammanetwork.messages.AdminChatMessageSystem
 import com.pepej.gammanetwork.messages.GlobalChatMessageSystem
 import com.pepej.gammanetwork.messages.PrivateMessageSystem
-import com.pepej.gammanetwork.messenger.GammaChatMessengerImpl
+import com.pepej.gammanetwork.messenger.GammaNetworkMessenger
 import com.pepej.gammanetwork.messenger.redis.Kreds
 import com.pepej.gammanetwork.messenger.redis.KredsCredentials
 import com.pepej.gammanetwork.messenger.redis.KredsProvider
@@ -16,11 +16,9 @@ import com.pepej.gammanetwork.redirect.GammaNetworkRequestHandler
 import com.pepej.gammanetwork.redirect.RedirectNetworkMetadataParameterProvider
 import com.pepej.gammanetwork.redirect.VelocityPlayerRedirector
 import com.pepej.papi.ap.Plugin
-import com.pepej.papi.ap.PluginDependency
 import com.pepej.papi.command.Commands
 import com.pepej.papi.dependency.Dependencies
 import com.pepej.papi.dependency.Dependency
-import com.pepej.papi.dependency.Repository
 import com.pepej.papi.messaging.InstanceData
 import com.pepej.papi.messaging.Messenger
 import com.pepej.papi.network.Network
@@ -43,20 +41,15 @@ import org.slf4j.LoggerFactory
     Dependency("org.apache.commons:commons-pool2:2.10.0"),
     Dependency("net.jodah:expiringmap:0.5.11"),
     Dependency("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.8.0-RC2"),
-//    Dependency("io.netty:netty-handler:4.1.104.Final"),
-//    Dependency("io.netty:netty-codec-redis:4.1.104.Final"),
-//    Dependency("io.github.microutils:kotlin-logging-jvm:3.0.5"),
-    Dependency(
-        "io.github.crackthecodeabhi:kreds:squareland-1.9",
-        repo = Repository(url = "https://oss.squareland.ru/repository/minecraft")
-    ),
+    Dependency("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0-RC2"),
+    Dependency("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.8.0-RC2"),
 )
 @Plugin(
     name = "gamma-network",
     version = "1.1.1",
     authors = ["pepej"],
-    depends = [
-        PluginDependency("papi"),
+    hardDepends = [
+        "papi",
     ]
 )
 class GammaNetwork : PapiJavaPlugin(), KredsProvider, InstanceData {
@@ -73,7 +66,7 @@ class GammaNetwork : PapiJavaPlugin(), KredsProvider, InstanceData {
 
     override suspend fun getKreds(credentials: KredsCredentials): Kreds {
 //        return runBlocking {
-            return GammaChatMessengerImpl.create(credentials)
+            return GammaNetworkMessenger.create(credentials)
 //        }
     }
 
@@ -97,6 +90,7 @@ class GammaNetwork : PapiJavaPlugin(), KredsProvider, InstanceData {
         serverId = config.getString("server_id")
         configuration = GammaNetworkConfiguration(
             ChatConfiguration(
+                enable = config.getBoolean("chat.enable"),
                 enableSplitting = config.getBoolean("chat.enable-splitting"),
                 localChatRadius = config.getInt("chat.local-server-chat-radius"),
                 localFormat = ChatConfiguration.Format(config.getString("chat.local-chat-format")),

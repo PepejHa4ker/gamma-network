@@ -125,7 +125,7 @@ class GammaNetworkRedirectSystem(
             }
 
             override fun onTimeout(replies: MutableList<ResponseMessage>) {
-                promise.supply(MissingResponse.INSTANCE)
+                promise.supply(MissingResponse)
             }
         }, 5, TimeUnit.SECONDS)
 
@@ -184,7 +184,7 @@ class GammaNetworkRedirectSystem(
         override fun getConversationId(): UUID = this.convoId
     }
 
-    private class MissingResponse : RedirectSystem.ReceivedResponse {
+    private object MissingResponse : RedirectSystem.ReceivedResponse {
         override fun getStatus(): RedirectSystem.ReceivedResponse.Status {
             return RedirectSystem.ReceivedResponse.Status.NO_REPLY
         }
@@ -197,9 +197,6 @@ class GammaNetworkRedirectSystem(
             return mutableMapOf()
         }
 
-        companion object {
-            val INSTANCE: MissingResponse = MissingResponse()
-        }
     }
 
     private class AllowAllHandler : RequestHandler {
