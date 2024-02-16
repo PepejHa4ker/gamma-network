@@ -12,3 +12,10 @@ chat:
 queue:
   ensure-joined-via: true
   connection-timeout: 10
+rcon:
+  password: '123'
+  port: 3999
+  whitelist: true,
+  whitelisted:
+    - '0.0.0.0'
+

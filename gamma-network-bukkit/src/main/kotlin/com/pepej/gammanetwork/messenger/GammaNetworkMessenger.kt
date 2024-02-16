@@ -43,13 +43,12 @@ class GammaNetworkMessenger private constructor(
             }
         }
 
-        suspend fun create(credentials: KredsCredentials): GammaNetworkMessenger = scope.async {
+        suspend fun create(credentials: KredsCredentials): GammaNetworkMessenger {
             val endpoint = Endpoint(credentials.address, credentials.port)
             val kredsClient = newClient(endpoint)
             val password = credentials.password
             kredsClient.auth(password)
-            val kredsClientConfig =
-                KredsClientConfig.Builder(readTimeoutSeconds = KredsClientConfig.NO_READ_TIMEOUT).build()
+            val kredsClientConfig = KredsClientConfig.Builder(readTimeoutSeconds = KredsClientConfig.NO_READ_TIMEOUT).build()
             val kredsSubscriberClient = newSubscriberClient(endpoint, PubSubListener, kredsClientConfig, null, password)
             kredsSubscriberClient.auth(null, password)
             val messenger = AbstractMessenger(
@@ -58,8 +57,8 @@ class GammaNetworkMessenger private constructor(
                 kredsSubscriberClient.unSubscribeChannel()
             )
             PubSubListener.messenger = messenger
-            GammaNetworkMessenger(messenger, kredsClient, kredsSubscriberClient)
-        }.await()
+            return GammaNetworkMessenger(messenger, kredsClient, kredsSubscriberClient)
+        }
 
     }
 

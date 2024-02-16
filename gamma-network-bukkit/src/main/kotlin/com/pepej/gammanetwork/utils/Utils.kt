@@ -14,6 +14,10 @@ import com.pepej.papi.utils.Players
 import org.bukkit.Location
 import org.bukkit.entity.Player
 
+
+const val GAMMA_RED: String = "&7[&cGamma&7]"
+const val GAMMA_GREEN: String = "&7[&aGamma&7]"
+
 inline fun <reified T> Messenger.getChannel(channel: String) = this.getChannel(channel, T::class.java)
 fun Profile.getPlayer(): Player? {
     return Players.getNullable(this.uniqueId)
