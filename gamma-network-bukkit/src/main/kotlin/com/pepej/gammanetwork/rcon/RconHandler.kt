@@ -1,90 +1,69 @@
-package com.pepej.gammanetwork.rcon
-
 import com.pepej.gammanetwork.config.RconConfiguration
+import com.pepej.gammanetwork.rcon.RconCommandSender
+import com.pepej.papi.scheduler.Schedulers
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
-import org.bukkit.Bukkit
+import org.bukkit.Server
 import org.bukkit.command.CommandException
 import org.bukkit.event.server.RemoteServerCommandEvent
 import org.slf4j.LoggerFactory
-import java.net.InetSocketAddress
-import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
 
-
-class RconHandler(
-    private val rconServer: RconServer,
-    private val rconConfig: RconConfiguration
-) : SimpleChannelInboundHandler<ByteBuf>() {
+class RconHandler(private val server: Server, private val config: RconConfiguration) : SimpleChannelInboundHandler<ByteBuf>() {
+    private val commandSender = RconCommandSender(server)
     private var loggedIn = false
-    private val commandSender = RconCommandSender(rconServer.server)
 
-    private val log = LoggerFactory.getLogger(RconServer::class.java)
+    private val log = LoggerFactory.getLogger(RconHandler::class.java)
 
-    override fun channelRead0(ctx: ChannelHandlerContext, buf: ByteBuf) {
-        if (rconConfig.whitelist) {
-            val ip = (ctx.channel().remoteAddress() as InetSocketAddress).address.hostAddress
-            if (ip !in rconConfig.whiteListedHosts) {
-                log.info("Address [{}] is not whitelisted. Connection rejected.", ctx.channel().remoteAddress())
-                this.sendResponse(ctx, -1, 2, "")
-                return
-            }
-        }
-
-        if (buf.readableBytes() >= 8) {
-            val requestId = buf.readIntLE()
-            val type = buf.readIntLE()
-            val payloadData = ByteArray(buf.readableBytes() - 2)
-            buf.readBytes(payloadData)
-            val payload = String(payloadData, StandardCharsets.UTF_8)
-            buf.readBytes(2)
-            when (type) {
-                3 -> {
-                    this.handleLogin(ctx, payload, requestId)
-                }
-                2 -> {
-                    this.handleCommand(ctx, payload, requestId)
-                }
-                else -> {
-                    this.sendLargeResponse(ctx, requestId, "Unknown request " + Integer.toHexString(type))
-                }
-            }
-        }
-    }
 
     private fun handleLogin(ctx: ChannelHandlerContext, payload: String, requestId: Int) {
-        if (this.rconConfig.password == payload) {
-            this.loggedIn = true
-            this.sendResponse(ctx, requestId, 2, "")
+        if (config.password == payload) {
+            loggedIn = true
+            sendResponse(ctx, requestId, TYPE_COMMAND, "")
             log.info("Rcon connection from [{}]", ctx.channel().remoteAddress())
         } else {
-            this.loggedIn = false
-            this.sendResponse(ctx, -1, 2, "")
+            loggedIn = false
+            sendResponse(ctx, -1, TYPE_COMMAND, "")
         }
     }
 
     private fun handleCommand(ctx: ChannelHandlerContext, payload: String, requestId: Int) {
-        if (!this.loggedIn) {
-            this.sendResponse(ctx, -1, 2, "")
+        if (!loggedIn) {
+            sendResponse(ctx, -1, TYPE_COMMAND, "")
         } else {
             try {
                 val event = RemoteServerCommandEvent(this.commandSender, payload)
-                Bukkit.getServer().pluginManager.callEvent(event)
-                rconServer.server.dispatchCommand(this.commandSender, event.command)
-                log.info("Executed command from [{}]: {}", ctx.channel().remoteAddress(), event.command)
+                server.pluginManager.callEvent(event)
+                Schedulers.sync().run {
+                    server.dispatchCommand(this.commandSender, event.command)
+                }
+                log.info("Executed command from [{}]: {}",ctx.channel().remoteAddress(), event.command)
                 val message = commandSender.flush()
-                this.sendLargeResponse(ctx, requestId, message)
-            } catch (var6: CommandException) {
-                this.sendLargeResponse(ctx, requestId, String.format("Error executing: %s (%s)", payload, var6.message))
+                sendLargeResponse(ctx, requestId, message)
+            } catch (ex: CommandException) {
+                sendLargeResponse(ctx, requestId, String.format("Error executing: %s (%s)", payload, ex.message))
             }
         }
     }
 
-    private fun sendResponse(ctx: ChannelHandlerContext, requestId: Int, type: Int, payload: String) {
+    override fun channelRead0(ctx: ChannelHandlerContext, buf: ByteBuf) {
+
+        val requestId = buf.readIntLE()
+        val type = buf.readIntLE()
+        val payload = readPayload(buf)
+
+        when (type.toByte()) {
+            TYPE_LOGIN -> handleLogin(ctx, payload, requestId)
+            TYPE_COMMAND -> handleCommand(ctx, payload, requestId)
+            else -> sendLargeResponse(ctx, requestId, "Unknown request " + Integer.toHexString(type));
+        }
+    }
+
+    private fun sendResponse(ctx: ChannelHandlerContext, requestId: Int, type: Byte, payload: String) {
         val buf = ctx.alloc().buffer()
         buf.writeIntLE(requestId)
-        buf.writeIntLE(type)
+        buf.writeIntLE(type.toInt())
         buf.writeBytes(payload.toByteArray(StandardCharsets.UTF_8))
         buf.writeByte(0)
         buf.writeByte(0)
@@ -93,16 +72,30 @@ class RconHandler(
 
     private fun sendLargeResponse(ctx: ChannelHandlerContext, requestId: Int, payload: String) {
         if (payload.isEmpty()) {
-            this.sendResponse(ctx, requestId, 0, "")
+            sendResponse(ctx, requestId, TYPE_RESPONSE, "")
         } else {
             var truncated: Int
             var start = 0
             while (start < payload.length) {
                 val length = payload.length - start
                 truncated = length.coerceAtMost(2048)
-                this.sendResponse(ctx, requestId, 0, payload.substring(start, truncated))
+                this.sendResponse(ctx, requestId, TYPE_RESPONSE, payload.substring(start, truncated))
                 start += truncated
             }
         }
+    }
+
+    private fun readPayload(buf: ByteBuf): String {
+        val payloadBytes = ByteArray(buf.readableBytes() - 2)
+        buf.readBytes(payloadBytes)
+        buf.skipBytes(2) //two byte padding
+        return String(payloadBytes, StandardCharsets.UTF_8)
+    }
+
+    companion object {
+        private const val FAILURE: Byte = -1
+        private const val TYPE_RESPONSE: Byte = 0
+        private const val TYPE_COMMAND: Byte = 2
+        private const val TYPE_LOGIN: Byte = 3
     }
 }

@@ -5,7 +5,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.ByteToMessageCodec
 
 
-object RconFramingHandler : ByteToMessageCodec<ByteBuf>() {
+class RconFramingHandler : ByteToMessageCodec<ByteBuf>() {
     override fun channelReadComplete(ctx: ChannelHandlerContext) {
         ctx.flush()
     }

@@ -25,7 +25,7 @@ object GammaNetworkRequestHandler : RequestHandler {
 
     private val log = LoggerFactory.getLogger(GammaNetworkRequestHandler::class.java)
     override fun handle(request: Request): Promise<RedirectSystem.Response> {
-        log.debug("Handling request for profile {} with params {}", request.profile, request.params)
+        log.debug("Handling request for profile {} with params {}", request.profile.name.get(), request.params)
         extractMetadata(request)
         return Promise.completed(RedirectSystem.Response(true, "Redirect via network", request.params))
 

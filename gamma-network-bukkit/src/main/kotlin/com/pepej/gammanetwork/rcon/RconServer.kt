@@ -1,5 +1,6 @@
 package com.pepej.gammanetwork.rcon
 
+import RconHandler
 import com.pepej.gammanetwork.config.RconConfiguration
 import com.pepej.papi.terminable.TerminableConsumer
 import com.pepej.papi.terminable.composite.CompositeTerminable
@@ -27,8 +28,8 @@ class RconServer(val server: Server, rconConfig: RconConfiguration) : Terminable
         serverBootstrap.childHandler(object : ChannelInitializer<SocketChannel>() {
             public override fun initChannel(ch: SocketChannel) {
                 ch.pipeline()
-                    .addLast(RconFramingHandler)
-                    .addLast(RconHandler(this@RconServer, rconConfig))
+                    .addLast(RconFramingHandler())
+                    .addLast(RconHandler(this@RconServer.server, rconConfig))
             }
         })
     }
