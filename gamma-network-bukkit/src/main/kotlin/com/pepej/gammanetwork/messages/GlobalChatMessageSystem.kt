@@ -121,10 +121,10 @@ object GlobalChatMessageSystem : TerminableModule {
 
                     if (!isInGlobalChat) {
                         it.sender().metadata().put(CHAT, ChatType.GLOBAL)
-                        it.replyAnnouncement("Глоабльный чат включен.")
+                        it.replyAnnouncement("Глобальный чат включен.")
                     } else {
                         it.sender().metadata().put(CHAT, ChatType.NOT_PRESENT)
-                        it.replyAnnouncement("Глоабльный чат&c выключен.")
+                        it.replyAnnouncement("Глобальный чат&c выключен.")
                     }
                 }
             }
