@@ -13,8 +13,10 @@ import com.pepej.gammanetwork.messenger.GammaNetworkMessenger
 import com.pepej.gammanetwork.messenger.redis.Kreds
 import com.pepej.gammanetwork.messenger.redis.KredsCredentials
 import com.pepej.gammanetwork.messenger.redis.KredsProvider
+import com.pepej.gammanetwork.module.NetworkMalformedProfileModule
 import com.pepej.gammanetwork.module.NetworkStatusModule
 import com.pepej.gammanetwork.module.NetworkSummaryModule
+import com.pepej.gammanetwork.network.NetworkModule
 import com.pepej.gammanetwork.rcon.RconServer
 import com.pepej.gammanetwork.redirect.GammaNetworkRedirectSystem
 import com.pepej.gammanetwork.redirect.GammaNetworkRequestHandler
@@ -97,6 +99,7 @@ class GammaNetwork : PapiJavaPlugin(), KredsProvider, InstanceData {
             chatConfig,
             rconConfig
         )
+        saveResource("logback.xml", true)
 
 
     }
@@ -124,7 +127,7 @@ class GammaNetwork : PapiJavaPlugin(), KredsProvider, InstanceData {
                 redirectSystem
             )
             provideService(LuckPerms::class.java, LuckPermsProvider.get())
-            network = Network.create(redis, this@GammaNetwork)
+            network = NetworkModule(redis, this@GammaNetwork)
             provideService(Network::class.java, network)
             redis.bindWith(this@GammaNetwork)
             // initialization
@@ -141,6 +144,7 @@ class GammaNetwork : PapiJavaPlugin(), KredsProvider, InstanceData {
             bindModule(NetworkCommands)
             bindModule(NetworkSummaryModule)
             bindModule(NetworkStatusModule)
+            bindModule(NetworkMalformedProfileModule)
             launch {
                 val rconServer = RconServer(server, configuration.rcon)
                 val channelFuture = rconServer.bind(configuration.rcon.port)
