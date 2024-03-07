@@ -13,6 +13,7 @@ queue:
   ensure-joined-via: true
   connection-timeout: 10
 rcon:
+  enabled: false
   password: '123'
   port: 3999
   whitelist: true,
