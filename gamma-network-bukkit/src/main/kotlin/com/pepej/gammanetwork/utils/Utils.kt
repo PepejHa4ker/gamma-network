@@ -35,6 +35,12 @@ inline fun <reified T> getServiceUnchecked(): T {
 }
 inline fun <reified T> typeTokenOf() = object : TypeToken<T>() {}
 
+fun Network.broadcast(message: String) {
+    Players.stream()
+        .filter { it.hasPermission("network.status.alerts") }
+        .forEach { Players.msg(it, "&7[&aGamma&7] &r$message") }
+}
+
 infix fun Location.distance(other: Location): Double {
     return this.distance(other)
 }

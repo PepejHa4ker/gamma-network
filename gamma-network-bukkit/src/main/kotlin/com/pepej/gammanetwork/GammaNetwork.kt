@@ -13,9 +13,7 @@ import com.pepej.gammanetwork.messenger.GammaNetworkMessenger
 import com.pepej.gammanetwork.messenger.redis.Kreds
 import com.pepej.gammanetwork.messenger.redis.KredsCredentials
 import com.pepej.gammanetwork.messenger.redis.KredsProvider
-import com.pepej.gammanetwork.module.NetworkMalformedProfileModule
-import com.pepej.gammanetwork.module.NetworkStatusModule
-import com.pepej.gammanetwork.module.NetworkSummaryModule
+import com.pepej.gammanetwork.module.ModuleManager
 import com.pepej.gammanetwork.network.NetworkModule
 import com.pepej.gammanetwork.rcon.RconServer
 import com.pepej.gammanetwork.redirect.GammaNetworkRedirectSystem
@@ -31,7 +29,9 @@ import com.pepej.papi.network.modules.DispatchModule
 import com.pepej.papi.network.modules.FindCommandModule
 import com.pepej.papi.network.redirect.RedirectSystem
 import com.pepej.papi.plugin.PapiJavaPlugin
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.luckperms.api.LuckPerms
 import net.luckperms.api.LuckPermsProvider
 import org.slf4j.LoggerFactory
@@ -90,6 +90,7 @@ class GammaNetwork : PapiJavaPlugin(), KredsProvider, InstanceData {
             adminMessageColor = ChatConfiguration.Format(config.getString("chat.admin-message-color")),
         )
         val rconConfig = RconConfiguration(
+            config.getBoolean("rcon.enabled"),
             config.getString("rcon.password"),
             config.getInt("rcon.port"),
             config.getBoolean("rcon.whitelist"),
@@ -142,9 +143,7 @@ class GammaNetwork : PapiJavaPlugin(), KredsProvider, InstanceData {
             bindModule(Ping)
             bindModule(GlobalChatMessageSystem)
             bindModule(NetworkCommands)
-            bindModule(NetworkSummaryModule)
-            bindModule(NetworkStatusModule)
-            bindModule(NetworkMalformedProfileModule)
+            bindModule(ModuleManager)
             launch {
                 val rconServer = RconServer(server, configuration.rcon)
                 val channelFuture = rconServer.bind(configuration.rcon.port)

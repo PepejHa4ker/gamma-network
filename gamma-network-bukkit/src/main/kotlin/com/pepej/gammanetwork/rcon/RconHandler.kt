@@ -16,7 +16,6 @@ class RconHandler(private val server: Server, private val config: RconConfigurat
 
     private val log = LoggerFactory.getLogger(RconHandler::class.java)
 
-
     private fun handleLogin(ctx: ChannelHandlerContext, payload: String, requestId: Int) {
         if (config.password == payload) {
             loggedIn = true
@@ -35,9 +34,11 @@ class RconHandler(private val server: Server, private val config: RconConfigurat
             try {
                 val event = RemoteServerCommandEvent(this.commandSender, payload)
                 server.pluginManager.callEvent(event)
+
                 Schedulers.sync().run {
                     server.dispatchCommand(this.commandSender, event.command)
                 }
+
                 log.info("Executed command from [{}]: {}",ctx.channel().remoteAddress(), event.command)
                 val message = commandSender.flush()
                 sendLargeResponse(ctx, requestId, message)
@@ -58,6 +59,11 @@ class RconHandler(private val server: Server, private val config: RconConfigurat
             TYPE_COMMAND -> handleCommand(ctx, payload, requestId)
             else -> sendLargeResponse(ctx, requestId, "Unknown request " + Integer.toHexString(type));
         }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
+        log.error("Exception during RCON!: {}", cause.message, cause)
     }
 
     private fun sendResponse(ctx: ChannelHandlerContext, requestId: Int, type: Byte, payload: String) {

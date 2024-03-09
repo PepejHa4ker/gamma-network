@@ -7,7 +7,10 @@ import com.pepej.papi.messaging.AbstractMessenger
 import com.pepej.papi.messaging.Channel
 import com.pepej.papi.utils.Log
 import io.github.crackthecodeabhi.kreds.connection.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import java.util.function.BiConsumer
 import java.util.function.Consumer
 
@@ -66,11 +69,11 @@ class GammaNetworkMessenger private constructor(
          var messenger: AbstractMessenger? = null
 
         override fun onSubscribe(channel: String, subscribedChannels: Long) {
-            Log.info("Subscribed to channel: $channel with channels $subscribedChannels")
+            Log.info("Subscribed to channel: $channel")
         }
 
         override fun onUnsubscribe(channel: String, subscribedChannels: Long) {
-            Log.info("Unsubscribed from channel: $channel with channels $subscribedChannels")
+            Log.info("Unsubscribed from channel: $channel")
         }
 
         override fun onMessage(channel: String, message: String) {

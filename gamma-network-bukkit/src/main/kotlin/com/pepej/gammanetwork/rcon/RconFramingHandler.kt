@@ -19,6 +19,9 @@ class RconFramingHandler : ByteToMessageCodec<ByteBuf>() {
         if (input.readableBytes() >= 4) {
             input.markReaderIndex()
             val length = input.readIntLE()
+            if (length <= 0) {
+                return
+            }
             if (input.readableBytes() < length) {
                 input.resetReaderIndex()
             } else {

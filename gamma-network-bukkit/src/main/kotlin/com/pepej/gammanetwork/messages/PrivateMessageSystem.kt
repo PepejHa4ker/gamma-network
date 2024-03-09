@@ -1,6 +1,5 @@
 package com.pepej.gammanetwork.messages
 
-import com.pepej.gammanetwork.GammaNetwork
 import com.pepej.gammanetwork.utils.getConversationChannel
 import com.pepej.gammanetwork.utils.getServiceUnchecked
 import com.pepej.papi.command.Commands
@@ -9,10 +8,12 @@ import com.pepej.papi.messaging.conversation.ConversationMessage
 import com.pepej.papi.messaging.conversation.ConversationReply
 import com.pepej.papi.messaging.conversation.ConversationReplyListener
 import com.pepej.papi.messaging.conversation.ConversationReplyListener.RegistrationAction
+import com.pepej.papi.network.Network
 import com.pepej.papi.scheduler.Schedulers
 import com.pepej.papi.terminable.TerminableConsumer
 import com.pepej.papi.terminable.module.TerminableModule
 import com.pepej.papi.text.Text.colorize
+import com.pepej.papi.utils.TabHandlers
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.util.*
@@ -21,6 +22,7 @@ import java.util.concurrent.TimeUnit
 object PrivateMessageSystem  : TerminableModule {
 
     private val messenger: Messenger = getServiceUnchecked()
+    private val network: Network = getServiceUnchecked()
     private val channel = messenger.getConversationChannel<PrivateMessage, PrivateMessageReply>("private-messages")
     private fun sendMessage(from: Player, to: String, message: String) {
 
@@ -74,8 +76,8 @@ object PrivateMessageSystem  : TerminableModule {
 
         Commands.create()
             .assertPlayer()
-            .tabHandler {
-                GammaNetwork.instance.network.onlinePlayers.values.map { it.name.get() }
+            .tabHandler { context ->
+                TabHandlers.of(context.arg(0).toString(), *network.onlinePlayers.values.map { it.name.get() }.toTypedArray())
             }
             .handler {
                 sendMessage(it.sender(), it.arg(0).parseOrFail(String::class.java), it.args().drop(1).joinToString(" "))

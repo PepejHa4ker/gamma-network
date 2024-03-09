@@ -1,18 +1,15 @@
 package com.pepej.gammanetwork.module
 
-import com.pepej.gammanetwork.commands.NetworkCommands
 import com.pepej.gammanetwork.utils.GAMMA_GREEN
 import com.pepej.gammanetwork.utils.GAMMA_RED
 import com.pepej.gammanetwork.utils.getServiceUnchecked
-import com.pepej.gammanetwork.utils.parseOrFail
 import com.pepej.papi.command.Commands
 import com.pepej.papi.event.filter.EventFilters
 import com.pepej.papi.events.Events
 import com.pepej.papi.network.Network
 import com.pepej.papi.network.Server
 import com.pepej.papi.scheduler.Schedulers
-import com.pepej.papi.terminable.TerminableConsumer
-import com.pepej.papi.terminable.module.TerminableModule
+import com.pepej.papi.terminable.composite.CompositeTerminable
 import com.pepej.papi.time.DurationFormatter
 import com.pepej.papi.time.Time
 import com.pepej.papi.utils.Players
@@ -21,36 +18,40 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.player.PlayerJoinEvent
 import java.time.Instant
 
-object NetworkSummaryModule : TerminableModule {
+object NetworkSummaryModule : NetworkModule {
 
     private val network: Network = getServiceUnchecked()
+    override val name = "Summary"
+    override var scope: CompositeTerminable? = CompositeTerminable.create()
+    override var enabled = false
 
-    override fun setup(consumer: TerminableConsumer) {
-        Commands.create()
+    override fun onEnable() {
+        scope?.let {
+            Commands.create()
                 .assertPermission("network.summary")
-            .assertUsage("[server]")
-            .handler { ctx ->
-                if (ctx.args().isNotEmpty()) {
-                    val server = ctx.arg(0).parse(Server::class.java)
-                    if (server.isPresent) {
-                        sendSummary(ctx.sender(), server.get())
+                .assertUsage("[server]")
+                .handler { ctx ->
+                    if (ctx.args().isNotEmpty()) {
+                        val server = ctx.arg(0).parse(Server::class.java)
+                        if (server.isPresent) {
+                            sendSummary(ctx.sender(), server.get())
+                        }
+
+                    } else {
+                        sendAllSeversSummary(ctx.sender(), network.servers.values)
                     }
 
-                } else {
-                    sendAllSeversSummary(ctx.sender(), network.servers.values)
-                }
+                }.registerAndBind(it, "online", "netsum")
 
-            }.registerAndBind(consumer, "online", "netsum")
-
-        Events.subscribe(PlayerJoinEvent::class.java, EventPriority.MONITOR)
-            .filter(EventFilters.playerHasPermission("network.summary.onjoin"))
-            .handler {
-                Schedulers.sync().runLater({
-                    sendAllSeversSummary(it.player, network.servers.values)
-                }, 1L)
-            }.bindWith(consumer)
+            Events.subscribe(PlayerJoinEvent::class.java, EventPriority.MONITOR)
+                .filter(EventFilters.playerHasPermission("network.summary.onjoin"))
+                .handler {
+                    Schedulers.sync().runLater({
+                        sendAllSeversSummary(it.player, network.servers.values)
+                    }, 1L)
+                }.bindWith(it)
+        }
     }
-
     private fun sendAllSeversSummary(sender: CommandSender, servers: Collection<Server>) {
         sendHeader(sender)
         servers

@@ -14,6 +14,7 @@ data class ChatConfiguration(
 }
 
 data class RconConfiguration(
+    val enable: Boolean,
     val password: String,
     val port: Int = 25566,
     val whitelist: Boolean = true,
