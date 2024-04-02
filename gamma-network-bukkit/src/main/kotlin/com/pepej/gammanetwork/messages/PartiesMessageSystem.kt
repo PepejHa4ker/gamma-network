@@ -1,6 +1,5 @@
 package com.pepej.gammanetwork.messages
 
-import com.pepej.gammanetwork.GammaNetwork.Companion.instance
 import com.pepej.gammanetwork.party.LocalServerParty
 import com.pepej.gammanetwork.party.Parties
 import com.pepej.gammanetwork.utils.getConversationChannel

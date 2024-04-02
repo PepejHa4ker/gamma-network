@@ -1,43 +1,45 @@
-package com.pepej.gammanetwork.messages
+package com.pepej.gammanetwork.module
 
-import PlayerMessage
 
-import com.pepej.gammanetwork.GammaNetwork
+import com.pepej.gammanetwork.GammaNetworkPlugin
+import com.pepej.gammanetwork.messages.CHAT
+import com.pepej.gammanetwork.messages.ChatType
+import com.pepej.gammanetwork.messages.PlayerMessage
 import com.pepej.gammanetwork.utils.getChannel
-import com.pepej.gammanetwork.utils.getServiceUnchecked
 import com.pepej.gammanetwork.utils.metadata
-import com.pepej.gammanetwork.utils.typeTokenOf
 import com.pepej.papi.command.Commands
 import com.pepej.papi.events.Events
-import com.pepej.papi.gson.GsonProvider
-import com.pepej.papi.messaging.Messenger
-import com.pepej.papi.metadata.Metadata
-import com.pepej.papi.metadata.MetadataKey
 import com.pepej.papi.scheduler.Schedulers
 import com.pepej.papi.terminable.TerminableConsumer
-import com.pepej.papi.terminable.module.TerminableModule
 import com.pepej.papi.text.Text.colorize
 import org.bukkit.Bukkit
 import org.bukkit.event.EventPriority
 import org.bukkit.event.player.AsyncPlayerChatEvent
-import java.util.*
 
 
+object AdminChatModule : NetworkModule("AdminChat") {
 
-object AdminChatMessageSystem : TerminableModule {
-
-    private val messenger: Messenger = getServiceUnchecked()
     private val channel = messenger.getChannel<PlayerMessage>("admin-channel")
 
-    override fun setup(consumer: TerminableConsumer) {
+    override fun onEnable(consumer: TerminableConsumer) {
         Events.subscribe(AsyncPlayerChatEvent::class.java, EventPriority.HIGHEST)
             .filter {
-                it.player.metadata().has(CHAT) && it.player.metadata().getOrDefault(CHAT, ChatType.NOT_PRESENT) == ChatType.ADMIN
+                it.player.metadata().has(CHAT) && it.player.metadata().getOrDefault(
+                    CHAT,
+                    ChatType.NOT_PRESENT
+                ) == ChatType.ADMIN
             }
             .handler {
-               it.isCancelled = true
+                it.isCancelled = true
                 val player = it.player
-                channel.sendMessage(PlayerMessage(player.uniqueId, player.displayName, GammaNetwork.instance.serverId, it.message))
+                channel.sendMessage(
+                    PlayerMessage(
+                        player.uniqueId,
+                        player.displayName,
+                        it.message,
+                        GammaNetworkPlugin.instance.serverId
+                    )
+                )
             }.bindWith(consumer)
         Commands.create()
             .assertPlayer()
@@ -47,10 +49,20 @@ object AdminChatMessageSystem : TerminableModule {
                 val player = it.sender()
                 if (it.args().isNotEmpty()) {
                     val message = it.args().joinToString(" ")
-                    channel.sendMessage(PlayerMessage(player.uniqueId, player.displayName, GammaNetwork.instance.serverId, message))
+                    channel.sendMessage(
+                        PlayerMessage(
+                            player.uniqueId,
+                            player.displayName,
+                            message,
+                            GammaNetworkPlugin.instance.serverId
+                        )
+                    )
 
                 } else {
-                    val isIsAdminChat = it.sender().metadata().has(CHAT) && it.sender().metadata().getOrDefault(CHAT, ChatType.NOT_PRESENT) == ChatType.ADMIN
+                    val isIsAdminChat = it.sender().metadata().has(CHAT) && it.sender().metadata().getOrDefault(
+                        CHAT,
+                        ChatType.NOT_PRESENT
+                    ) == ChatType.ADMIN
                     if (!isIsAdminChat) {
                         it.sender().metadata().put(CHAT, ChatType.ADMIN)
                         it.replyAnnouncement("Админ чат включен.")
@@ -64,7 +76,10 @@ object AdminChatMessageSystem : TerminableModule {
 
         channel.newAgent { _, message ->
             Schedulers.sync().run {
-                Bukkit.broadcast(colorize("&c[Admin-chat] &a[${message.server}] ${message.displayName}&f: ${message.message}"), "gammachat.notify")
+                Bukkit.broadcast(
+                    colorize("&c[Admin-chat] &a[${message.server}] ${message.displayName}&f: ${message.message}"),
+                    "gammachat.notify"
+                )
             }
         }.bindWith(consumer)
     }

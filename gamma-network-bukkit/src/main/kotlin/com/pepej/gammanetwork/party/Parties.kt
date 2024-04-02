@@ -1,12 +1,9 @@
 package com.pepej.gammanetwork.party
 
-import com.google.gson.JsonElement
-import com.pepej.gammanetwork.GammaNetwork.Companion.instance
+import com.pepej.gammanetwork.GammaNetworkPlugin.Companion.instance
 import com.pepej.gammanetwork.utils.getChannel
 import com.pepej.gammanetwork.utils.getServiceUnchecked
 import com.pepej.papi.events.Events
-import com.pepej.papi.gson.GsonSerializable
-import com.pepej.papi.gson.JsonBuilder
 import com.pepej.papi.messaging.Messenger
 import com.pepej.papi.scheduler.Schedulers
 import com.pepej.papi.terminable.TerminableConsumer

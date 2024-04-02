@@ -1,20 +1,16 @@
 package com.pepej.gammanetwork
 
 import com.pepej.gammanetwork.commands.NetworkCommands
-import com.pepej.gammanetwork.commands.Ping
 import com.pepej.gammanetwork.commands.registry.Arguments
 import com.pepej.gammanetwork.config.ChatConfiguration
 import com.pepej.gammanetwork.config.GammaNetworkConfiguration
 import com.pepej.gammanetwork.config.RconConfiguration
-import com.pepej.gammanetwork.messages.AdminChatMessageSystem
-import com.pepej.gammanetwork.messages.GlobalChatMessageSystem
-import com.pepej.gammanetwork.messages.PrivateMessageSystem
 import com.pepej.gammanetwork.messenger.GammaNetworkMessenger
-import com.pepej.gammanetwork.messenger.redis.Kreds
-import com.pepej.gammanetwork.messenger.redis.KredsCredentials
-import com.pepej.gammanetwork.messenger.redis.KredsProvider
+import com.pepej.gammanetwork.messenger.redis.Redis
+import com.pepej.gammanetwork.messenger.redis.RedisCredentials
+import com.pepej.gammanetwork.messenger.redis.RedisProvider
 import com.pepej.gammanetwork.module.ModuleManager
-import com.pepej.gammanetwork.network.NetworkModule
+import com.pepej.gammanetwork.network.GammaNetwork
 import com.pepej.gammanetwork.rcon.RconServer
 import com.pepej.gammanetwork.redirect.GammaNetworkRedirectSystem
 import com.pepej.gammanetwork.redirect.GammaNetworkRequestHandler
@@ -25,17 +21,16 @@ import com.pepej.papi.command.Commands
 import com.pepej.papi.messaging.InstanceData
 import com.pepej.papi.messaging.Messenger
 import com.pepej.papi.network.Network
+import com.pepej.papi.network.event.ServerDisconnectEvent
 import com.pepej.papi.network.modules.DispatchModule
 import com.pepej.papi.network.modules.FindCommandModule
 import com.pepej.papi.network.redirect.RedirectSystem
 import com.pepej.papi.plugin.PapiJavaPlugin
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import net.luckperms.api.LuckPerms
 import net.luckperms.api.LuckPermsProvider
 import org.slf4j.LoggerFactory
 
+const val VERSION: Int = 8
 
 @Plugin(
     name = "gamma-network",
@@ -45,37 +40,35 @@ import org.slf4j.LoggerFactory
         "papi",
     ]
 )
-class GammaNetwork : PapiJavaPlugin(), KredsProvider, InstanceData {
+class GammaNetworkPlugin : PapiJavaPlugin(), RedisProvider, InstanceData {
 
 
-    private lateinit var _redis: Kreds
+    private lateinit var _redis: Redis
 
     private val log = LoggerFactory.getLogger(GammaNetwork::class.java)
 
-    override val redis: Kreds
+    override val redis: Redis
         get() {
             return _redis
         }
 
-    override suspend fun getKreds(credentials: KredsCredentials): Kreds {
-//        return runBlocking {
-        return GammaNetworkMessenger.create(credentials)
-//
+    override fun getRedis(credentials: RedisCredentials): Redis {
+        return GammaNetworkMessenger(credentials)
     }
 
-    private lateinit var _globalCredentials: KredsCredentials
+    private lateinit var _globalCredentials: RedisCredentials
 
-    override val globalCredentials: KredsCredentials
+    override val globalCredentials: RedisCredentials
         get() {
             return _globalCredentials
         }
 
     companion object {
-        lateinit var instance: GammaNetwork
+        lateinit var instance: GammaNetworkPlugin
     }
 
     lateinit var serverId: String
-    lateinit var network: Network
+    lateinit var network: GammaNetwork
     lateinit var configuration: GammaNetworkConfiguration
     override fun onPluginLoad() {
         instance = this
@@ -106,45 +99,43 @@ class GammaNetwork : PapiJavaPlugin(), KredsProvider, InstanceData {
     }
 
     override fun onPluginEnable() {
-        CoroutineScope(Dispatchers.Default).launch {
-            _globalCredentials = KredsCredentials.fromConfig(config)
-            _redis = getKreds(_globalCredentials)
 
-            provideService(KredsProvider::class.java, this@GammaNetwork)
-            provideService(KredsCredentials::class.java, _globalCredentials)
-            provideService(Messenger::class.java, redis)
-            val ensureJoinedViaQueue = config.getBoolean("queue.ensure-joined-via")
-            val connectionTimeout = config.getLong("queue.connection-timeout")
-            val redirectSystem = GammaNetworkRedirectSystem(
-                redis,
-                this@GammaNetwork, VelocityPlayerRedirector,
-                connectionTimeout
-            )
-            redirectSystem.addDefaultParameterProvider(RedirectNetworkMetadataParameterProvider)
-            redirectSystem.setHandler(GammaNetworkRequestHandler)
-            redirectSystem.setEnsure(ensureJoinedViaQueue)
-            provideService(
-                RedirectSystem::class.java,
-                redirectSystem
-            )
-            provideService(LuckPerms::class.java, LuckPermsProvider.get())
-            network = NetworkModule(redis, this@GammaNetwork)
-            provideService(Network::class.java, network)
-            redis.bindWith(this@GammaNetwork)
-            // initialization
-            Arguments.apply {
-                profile(Commands.parserRegistry(), network)
-                server(Commands.parserRegistry(), network)
-            }
-            bindModule(FindCommandModule(network, arrayOf("find")))
-            bindModule(DispatchModule(redis, this@GammaNetwork, arrayOf("dispatch", "exec")))
-            bindModule(PrivateMessageSystem)
-            bindModule(AdminChatMessageSystem)
-            bindModule(Ping)
-            bindModule(GlobalChatMessageSystem)
-            bindModule(NetworkCommands)
-            bindModule(ModuleManager)
-            launch {
+        _globalCredentials = RedisCredentials.fromConfig(config)
+        _redis = getRedis(_globalCredentials)
+
+        provideService(RedisProvider::class.java, this@GammaNetworkPlugin)
+        provideService(RedisCredentials::class.java, _globalCredentials)
+        provideService(Messenger::class.java, redis)
+        provideService(LuckPerms::class.java, LuckPermsProvider.get())
+        network = GammaNetwork(redis, this@GammaNetworkPlugin)
+        provideService(Network::class.java, network)
+        val ensureJoinedViaQueue = config.getBoolean("queue.ensure-joined-via")
+        val connectionTimeout = config.getLong("queue.connection-timeout")
+        val redirectSystem = GammaNetworkRedirectSystem(
+            redis,
+            this@GammaNetworkPlugin, VelocityPlayerRedirector,
+            connectionTimeout
+        )
+
+        redirectSystem.addDefaultParameterProvider(RedirectNetworkMetadataParameterProvider)
+        redirectSystem.setHandler(GammaNetworkRequestHandler)
+        redirectSystem.setEnsure(ensureJoinedViaQueue)
+        provideService(
+            RedirectSystem::class.java,
+            redirectSystem
+        )
+
+        redis.bindWith(this@GammaNetworkPlugin)
+        // initialization
+        Arguments.apply {
+            profile(Commands.parserRegistry(), network)
+            server(Commands.parserRegistry(), network)
+        }
+        bindModule(FindCommandModule(network, arrayOf("find")))
+        bindModule(DispatchModule(redis, this@GammaNetworkPlugin, arrayOf("dispatch", "exec")))
+        bindModule(NetworkCommands)
+        bindModule(ModuleManager)
+        if (configuration.rcon.enable) {
                 val rconServer = RconServer(server, configuration.rcon)
                 val channelFuture = rconServer.bind(configuration.rcon.port)
                 val channel = channelFuture.awaitUninterruptibly().channel()
@@ -155,12 +146,17 @@ class GammaNetwork : PapiJavaPlugin(), KredsProvider, InstanceData {
                     log.info("Rcon server started!")
                 }
 
-
-            }
-
         }
+
     }
 
+    override fun onPluginDisable() {
+        network.postEvent(
+            ServerDisconnectEvent(
+                serverId, "stopping"
+            )
+        )
+    }
 
     override fun getId(): String {
         return serverId

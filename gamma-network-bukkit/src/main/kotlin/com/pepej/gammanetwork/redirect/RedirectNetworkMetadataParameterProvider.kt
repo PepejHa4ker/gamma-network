@@ -1,12 +1,7 @@
 package com.pepej.gammanetwork.redirect
 
 import com.google.gson.JsonElement
-import com.pepej.gammanetwork.GammaNetwork.Companion.instance
-import com.pepej.gammanetwork.messages.AdminChatMessageSystem
 import com.pepej.gammanetwork.messages.CHAT
-import com.pepej.gammanetwork.messages.GlobalChatMessageSystem
-import com.pepej.gammanetwork.utils.getPlayer
-import com.pepej.gammanetwork.utils.metadata
 import com.pepej.papi.gson.GsonProvider
 import com.pepej.papi.metadata.Metadata
 import com.pepej.papi.metadata.MetadataKey

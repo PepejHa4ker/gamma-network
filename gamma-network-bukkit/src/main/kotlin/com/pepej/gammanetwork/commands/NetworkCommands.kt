@@ -1,6 +1,6 @@
 package com.pepej.gammanetwork.commands
 
-import com.pepej.gammanetwork.GammaNetwork.Companion.instance
+import com.pepej.gammanetwork.GammaNetworkPlugin.Companion.instance
 import com.pepej.gammanetwork.utils.getServiceUnchecked
 import com.pepej.papi.command.Commands
 import com.pepej.papi.network.redirect.RedirectSystem
@@ -31,7 +31,7 @@ object NetworkCommands : TerminableModule {
                         )
                     }
             }
-            .registerAndBind(consumer, "hub")
+            .registerAndBind(consumer, "hub", "хаб")
 
 
 

@@ -1,10 +1,12 @@
 package com.pepej.gammanetwork.module
 
+import com.pepej.gammanetwork.commands.Tabs.enableDisableTab
 import com.pepej.gammanetwork.utils.broadcast
 import com.pepej.gammanetwork.utils.getChannel
 import com.pepej.gammanetwork.utils.getServiceUnchecked
 import com.pepej.gammanetwork.utils.parseOrFail
 import com.pepej.papi.command.Commands
+import com.pepej.papi.command.context.CommandContext
 import com.pepej.papi.messaging.Messenger
 import com.pepej.papi.network.Network
 import com.pepej.papi.terminable.Terminable
@@ -12,47 +14,64 @@ import com.pepej.papi.terminable.TerminableConsumer
 import com.pepej.papi.terminable.composite.CompositeTerminable
 import com.pepej.papi.terminable.module.TerminableModule
 import com.pepej.papi.utils.TabHandlers
+import org.bukkit.command.CommandSender
 import org.slf4j.LoggerFactory
 
-interface NetworkModule : Terminable {
+abstract class NetworkModule(
+    val id: String,
+) : Terminable {
 
-    val name: String
-    var scope: CompositeTerminable?
-    var enabled: Boolean
+    protected val network: Network = getServiceUnchecked()
+    protected val messenger: Messenger = getServiceUnchecked()
+    internal var scope: CompositeTerminable? = CompositeTerminable.create()
+    protected var enabled: Boolean = false
+    private val log = LoggerFactory.getLogger(javaClass)
 
     fun enable() {
-        enabled = true
+        if (enabled) {
+            log.warn("Module $id is already enabled")
+            return
+        }
         if (scope == null) {
             scope = CompositeTerminable.create()
         }
-        onEnable()
+        scope?.let {
+            log.info("Enabling module {} scope {}", id, scope)
+            onEnable(it)
+        }
+
+        enabled = true
+
+
     }
     fun disable() {
+        if (!enabled) {
+            log.warn("Module $id is already disabled")
+            return
+        }
+        scope?.let(this::onDisable)
         scope?.close()
         scope = null
         enabled = false
-        onDisable()
     }
 
-    fun onDisable() {}
+    open fun onDisable(consumer: TerminableConsumer) {}
 
-    fun onEnable() {}
+    open fun onEnable(consumer: TerminableConsumer) {}
+    open fun onReload() {}
+
     fun reload() {
         if (!isReloadable()) {
-            throw UnsupportedOperationException("Module $name is not reloadable")
+            throw UnsupportedOperationException("Module $id is not reloadable")
         }
-        if (!isEnabled()) {
-            throw IllegalStateException("Module $name is not enabled")
+        if (!enabled) {
+            throw IllegalStateException("Module $id is not enabled")
         }
+        onReload()
         disable()
         enable()
     }
-    fun isEnabled(): Boolean {
-        return enabled
-    }
-    fun isDisabled(): Boolean {
-        return !enabled
-    }
+
     fun isReloadable(): Boolean {
         return false
     }
@@ -70,47 +89,74 @@ object ModuleManager : TerminableModule {
     private val log = LoggerFactory.getLogger(ModuleManager::class.java)
     private val channel = messenger.getChannel<ModuleUpdateMessage>("network-modules").apply {
         newAgent { _, (name, enabled) ->
-            val module = findModule(name) ?: return@newAgent
-            if (enabled) {
-                module.enable()
-            } else {
-                module.disable()
-            }
-            network.broadcast("Module $name ${if (enabled) "&aenabled" else "&cdisabled"}")
-            log.info("Module $name ${if (enabled) "enabled" else "disabled"}")
+            toggleModule(name, enabled, fromNetwork = true)
 
 
         }
     }
+
+    private fun toggleModule(name: String, enabled: Boolean, fromNetwork: Boolean) {
+        val module = findModule(name) ?: return
+        if (enabled) {
+            module.enable()
+        } else {
+            module.disable()
+        }
+        if (fromNetwork) {
+            network.broadcast("Module $name ${if (enabled) "&aenabled" else "&cdisabled"}")
+        }
+        log.info("Module $name ${if (enabled) "enabled" else "disabled"}")
+    }
+
     override fun setup(consumer: TerminableConsumer) {
         init()
+        modules.forEach { it.scope?.let(consumer::bind) }
         Commands.create()
             .assertPermission("network.modules.manage")
+//            .assertUsage("<module|all> <server|all> <enable|disable>")
             .tabHandler { context ->
                 when (context.args().size) {
                     1 -> {
-                        TabHandlers.of(context.arg(0).parseOrFail(), "all", *modules.map { it.name }.toTypedArray())
+                        TabHandlers.of(context.arg(0).parseOrFail(), "all", *modules.map { it.id }.toTypedArray())
                     }
                     2 -> {
-                        TabHandlers.of(context.arg(1).parseOrFail(), "enable", "disable")
+                        TabHandlers.of(context.arg(1).parseOrFail(), "all", *network.servers.values.map { it.id }.toTypedArray())
+                    }
+                    3 -> {
+                        context.arg(2).enableDisableTab()
                     }
                     else -> listOf()
                 }
             }
             .handler { context ->
-                if (context.args().size < 2) {
-                    return@handler context.replyError("Usage: module <module|all> <enable|disable>")
+                if (context.args().size < 3) {
+                    return@handler context.replyError("Usage: module <module|all> <server|all> <enable|disable>")
                 }
                 val name = context.arg(0).parseOrFail<String>()
-                val enable = context.arg(1).parseOrFail<String>().equals("enable", true)
-                if (name.equals("all", true)) {
-                    modules.forEach { channel.sendMessage(ModuleUpdateMessage(it.name, enable)) }
-                    return@handler context.replyAnnouncement("All modules updated")
-                }
-                val module = findModule(name) ?: return@handler context.replyError("Module not found")
-                channel.sendMessage(ModuleUpdateMessage(module.name, enable))
+                val server = context.arg(1).parseOrFail<String>()
+                val enable = context.arg(2).parseOrFail<String>().equals("enable", true)
+                process(context, name, server, enable)
+
             }
             .registerAndBind(consumer, "module")
+
+    }
+
+    private fun process(context: CommandContext<CommandSender>, name: String, server: String, enabled: Boolean) {
+        val allModules = name.equals("all", true)
+        val allServers = server.equals("all", true)
+        when {
+            allModules && allServers -> {
+                modules.forEach { channel.sendMessage(ModuleUpdateMessage(it.id, enabled)) }
+            }
+            allModules -> {
+                modules.forEach { toggleModule(it.id, enabled, fromNetwork = false) }
+            }
+            allServers -> {
+                channel.sendMessage(ModuleUpdateMessage(name, enabled))
+            }
+        }
+        return context.replyAnnouncement("Success")
 
     }
 
@@ -124,10 +170,17 @@ object ModuleManager : TerminableModule {
         modules.add(NetworkMalformedProfileModule)
         modules.add(NetworkStatusModule)
         modules.add(NetworkSummaryModule)
+        modules.add(NetworkAlertModule)
+        modules.add(AdminChatModule)
+        modules.add(PrivateMessageSystem)
+        modules.add(GlobalChatModule)
+        modules.add(NetworkVersionCheckerModule)
+        modules.forEach { it.enable() }
+
     }
 
     private fun findModule(name: String): NetworkModule? {
-        return modules.find { it.name.equals(name, true) }
+        return modules.find { it.id.equals(name, true) }
     }
 
 

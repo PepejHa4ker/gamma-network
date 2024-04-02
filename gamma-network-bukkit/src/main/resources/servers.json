@@ -1,0 +1,384 @@
+[
+  {
+    "menu-id": 11,
+    "id": "BedWars",
+    "name": "&6Bed&cWars",
+    "material": "BED",
+    "arcade": false,
+    "npc": {
+      "position": {
+        "x": 163.5,
+        "y": 91,
+        "z": 10.5,
+        "world": "hub"
+      },
+      "texture": "eyJ0aW1lc3RhbXAiOjE1MjUzNTYyODczNjQsInByb2ZpbGVJZCI6IjkxOGEwMjk1NTlkZDRjZTZiMTZmN2E1ZDUzZWZiNDEyIiwicHJvZmlsZU5hbWUiOiJCZWV2ZWxvcGVyIiwic2lnbmF0dXJlUmVxdWlyZWQiOnRydWUsInRleHR1cmVzIjp7IlNLSU4iOnsidXJsIjoiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS80ZjEyY2I2MWZiOGZjMzlkNjM0OWM5OWI1OGRhYWNiZmJkM2NiZWQ0ZDY1OTQ1ZTBkZTEwZTViNTY3YWJlZiJ9fX0=",
+      "signature": "muLmMpRQR5MAivqsLnffC70pcBS8Jr7sDNn8crkHj5PNufy/oGPvtWeIOL3k03d+ZSXxWACfGPcxVPu9Ev/Lt7y02HGKi0yEW8nFdj6RDeBJzz3ILV0hn/zqFCQTialGpLZrYKK1KGVyetP+EZj5A+vyMJd8p69UHGVvRoCURUUNCj5t5iUlV2baDtJTu5iw1gsQkvK1+o6x4t5CudyrKwA5nBV2996R8HXUxPBrxmaWUg7uNtEvBVG7AMVVfqygNqTdJZDWK7D+UanpI5iKHpLa8slB3WI/nDKd/0MZh7rqcecLODlHkoVBNyIRNmZ/B+hxDll/q72uIJeWxsDEW/7pCa22pSpZMeWGAgKe20SuRbC3wzJ818RjVzQAsqPE6dGPz+Ppv5HRaFDyR5Pit3wr7jQLcS4HH9kU5eKVlYocQkGn3scRac4nCVFF6YLckaL05B5YcfrNxdIdEuyTvaCWcTqMG26qDF5j1eOTRbg3iWYw2regb2gQdzXnDe3B97c/6XS2Wkabdc7jSf6wfWYeL5Rpj4XxZVEszFbjCv/P+7JU9CavNLO30+n/0RDdIrT1SwHt+zhH3o+Nw39DDe3hjmWIKFiFbFmBEmyujUkbJ5GBRT37BJQfW3/1dYTlPuuL8/z18Ko6sd8RbAKEyj3UWK5QghUVN2KZ7EDZ20E="
+
+    },
+    "description": [
+      "",
+      "",
+      "  &6Режим, в котором тебе и твоим товарищам предстоит",
+      "&6оборонять кровать своей команды",
+      "&6и уничтожать вражеские кровати",
+      "",
+      " &eПридумай свой способ,",
+      "&eчтобы уничтожить вражеские кровати!",
+      ""
+    ]
+  },
+  {
+    "menu-id": 22,
+    "id": "BlockHunt",
+    "name": "&bHide&eAnd&aSeek",
+    "material": "SPONGE",
+    "arcade": false,
+    "npc": {
+      "position": {
+        "x": 158.5,
+        "y": 92,
+        "z": 11.5,
+        "world": "hub"
+      },
+      "texture": "ewogICJ0aW1lc3RhbXAiIDogMTYxMzIwODU4NTYwOCwKICAicHJvZmlsZUlkIiA6ICJjNTBhZmE4YWJlYjk0ZTQ1OTRiZjFiNDI1YTk4MGYwMiIsCiAgInByb2ZpbGVOYW1lIiA6ICJUd29FQmFlIiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzhiYzRiNmQ4NDI4ZTU5MGRhNjkxMTI3ODU3NjRmNWY0NjExY2JlOGNiYjdkYWQ4NGVlM2JmZDJhMzhkZjJhZmIiCiAgICB9CiAgfQp9",
+      "signature": "b/83PtJD4fYJAJZVgIC/B8K23rAL8Tz1vHE5oOZ8hTW8TwuWO3S3lZoYp8Wow2CI7WncNJ4q/aA45opW9kWuIsBPcEm0ke/vtzG2DoF9Rpyeiy+Ugz/OwFkMKgfmhgDjiiDnv2hG5BZ+Jct/Z6xoLatxD2Uelbk4f4qF1h30eoXCW+soOT1UcLcjw3ytWKRC8GvYs+uvVppTI3l4/rKwdWHC4yijrhHXI2U6XNOGLlqCgifautc7uZljfTjB6MGAaJw79DJL0Hc4crF8TeM1y+JhHR7bE2gmKWa0wEV2htk88mkvlK2jWRNa/hwV3wVRwa1yfvjUuM7RTV59g7XButBxUpYbW9KLsnFyouvtaiDbBdjNlT7yPp9tMZGEyT9rHKv+6ugeKlnD+xmtneWh10M+FPZWmGow/+P0Dc2QdZfLZyqzgbdD9Jevgg4uUp+mcKRPoxpNw86i4qr6vhvEINwSteGaGp9aDPKlEZaO8vXHMfPdCcymenvADYc1fnvqNmBMjIt/xyK45/NgnxPnlTMyczbRrpQCrkFV1nHOEAdsBwXUzqdh8GZ0dAvfLXLeOkcu31JhL6D0Bvta+dmxDe8NpQiCA5rOwVViJQP0QjnyHJysSt+uLgWw+VIXfcleYc03MUAADiyj/wBhwEn/ZdSjnXvVbLqTkGL1bwMFkLg="
+    },
+    "description": [
+      "",
+      "  &aПрячься или умри!",
+      "",
+      "&6Твоя главная задача - спрятаться быстро и надежно",
+      ""
+    ]
+  },
+  {
+    "menu-id": 40,
+    "id": "Creative",
+    "name": "&bCreative",
+    "material": "DIAMOND",
+    "arcade": false,
+    "npc": {
+      "position": {
+        "x": 158.5,
+        "y": 90.5,
+        "z": 19.5,
+        "world": "hub"
+      },
+      "texture": "eyJ0aW1lc3RhbXAiOjE1MjIxNjgzMDY3NjMsInByb2ZpbGVJZCI6ImFkMWM2Yjk1YTA5ODRmNTE4MWJhOTgyMzY0OTllM2JkIiwicHJvZmlsZU5hbWUiOiJGdXJrYW5iejAwIiwic2lnbmF0dXJlUmVxdWlyZWQiOnRydWUsInRleHR1cmVzIjp7IlNLSU4iOnsidXJsIjoiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS82NzIxNTBiNjQ2NmI5ZDZhYWExODUzZGQ3NDYxNjM3OGY3ODk2Yjg3YWNjYWMzZjY0YWQ0M2VjMzJkYjg4MWMifX19",
+      "signature": "QT1AUMTuZzk5EhaT8ZgZaEj1s75wpmZay+Bc0kCmtcC2IeEiSot+8hXonZasPxGxEzMy7wDqGqvYXB9dKmzrG3jDnh5GzyrUlHYS5JuNk6X3Q1HlgMHQaWsdVfUDSG65WmcEPhJuReR2Hw4obon3UV4Velu1xOz5lC11kVBVTfPqa3GKpXYQVKIstjRZMbVRvjiVschrQsxdJyaMChzEkYCbmQx/jo+Pm2fy3VqWKXwOl1F/nCXdUaev64np3EsxIWnskoKvezieDmisFkhISIjuVDeJ/Dc2/MFdm9asieDI1bfR3wCsD4KDy/Ky6NKBhaWO5lbdmMIzcwkY/Muz7CafkS9syXVsUWh9VHPzYz/JfO8Zv/MqVWpYCdChcAMWpBA0LEs3UtlYbKugdb7jVIu7dUozsVRifv+6b+HlmD4EKfJwk3gpgkiF8jd6lixmsS6Ijo3UauvvJ9hTirzd4lZWbYnJvv5q2xZ1/SJ6ZeuyWUu7AykmRZ0mLTC5SMqMaq0J3aQHhJhnGgUnOwc8wD9IqFWPg8p85XvUDnPEFUI3ffeqoVSHeO9cmPfWgqYOPzTAbIyJYtPKsShcgEFuGC06OCTG9t1PzkZ9QHuuyv6/iEQvFYZ9zhVCLxPBaHIM59TeRU2+n1ovUQxydqVYeykVEQ6wSyJACMuO93D+/4A="
+
+    },
+    "description": [
+      "",
+      "",
+      "  &6Пожалуй, самый творческий режим, в котором",
+      "&6возможно воплотить любую фантазию",
+      "&6и создать настоящее произведение искусства",
+      "  &6Создай что угодно на выделенном тебе участке земли,",
+      "&6и удиви других игроков своими постройками!",
+      ""
+    ]
+  },
+  {
+    "menu-id": 15,
+    "id": "SkyWars",
+    "name": "&9SkyWars",
+    "material": "EYE_OF_ENDER",
+    "arcade": false,
+    "npc": {
+      "position": {
+        "x": 166.5,
+        "y": 91,
+        "z": 11.5,
+        "world": "hub"
+      },
+      "texture": "eyJ0aW1lc3RhbXAiOjE1NjQ0MjAzMzQ1NDQsInByb2ZpbGVJZCI6IjkxZjA0ZmU5MGYzNjQzYjU4ZjIwZTMzNzVmODZkMzllIiwicHJvZmlsZU5hbWUiOiJTdG9ybVN0b3JteSIsInNpZ25hdHVyZVJlcXVpcmVkIjp0cnVlLCJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzBkYzY3MzNlY2M0N2JjMmMyNTdmMjg4YjFjZDQyZTlmNzJmNjk4NzU3OWMzMGI3NzdlMDI4MzBmYjJjYWZiOCJ9fX0=",
+      "signature": "Xv5vJMF0cCeOozCsMFJA2l9AOriWjZhAW9qo7ZYGeWUJDxyggogS90KjLrzvbc6AfxWgKYETJlOYHqdQpUgBQAhK4f+cMgSauvNCEJ1y/YNj55G7M5gmAbAxQkD4BA90NMtmeSWUSGHNA71jjhGIdubQmQMtDMiEhDPFrKVj9Pbauvn4rLDkXjnnh7Lw9WKG8aPbbrBAPSkfveAF0LZGpahsVxi47oWFzRo0M5cH+Eg1clEP0avvU3oH2BQqyYzL2ZJmNuWkI0ESjwfBgOkD15PRfKNSVfJvLufM0NvIRpTcprjPXsF7GbAsZTV8FE/DzqgILsgIWIDvto5oYYXlVAzJkpag+U5ODHVkqNNaR2VOWc7vp4jGjocShVQBEqw5733l0uvdapYW1JsD09iU+CQIRU/T+RBoGDFLSfP9Brk2YS8CjFpjA/wvGzeWHpULy5hYeHbEB00zfk4/6bqafv9W+wCB6rO9mFGEj182eaG4H7wNuFcQ14lrHmr73maHWGQKNCP19ptCt7ejvMAVeTi9cqQieQ1+DxZGNE+dlbN1kS+dAVzUahrTqtJskycxfPzKHkGl7CBegY0P9i9mxoiMNrpbyMzZsDpSiSjtgLzsrLw+QaLmrxnvNTjqd7XKf5Maj2Pb10qYxOiRFxIzNYBF1B2BCSb3QZUUDV0QV6I="
+
+    },
+    "description": [
+      "",
+      "",
+      "  &6Каждый игрок/команда появляется на своём острове",
+      "&6и главной целью этого режима",
+      "  &6Убивайте игроков оружием или найдите другой способ,",
+      "&6обхитрив противника",
+      ""
+    ]
+  },
+  {
+    "menu-id": 29,
+    "id": "Murder",
+    "name": "&cMurder&7Mystery",
+    "material": "IRON_SWORD",
+    "arcade": false,
+    "npc": {
+      "position": {
+        "x": 157.5,
+        "y": 91,
+        "z": 16.5,
+        "world": "hub"
+      },
+      "texture": "ewogICJ0aW1lc3RhbXAiIDogMTU5MDAxNjcwMDcyMywKICAicHJvZmlsZUlkIiA6ICJmNzBkMGJiZWM2OGE0Y2Q4OTEzY2E5ZjJhMTU0ZjY3NyIsCiAgInByb2ZpbGVOYW1lIiA6ICJUZWZhbnQiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGY1MjdkY2NkNGM2OTA2YTI5NTY1Yzk1NjEwMWQzYTQ4NDU0MjVmYzU0MGI0ZDkyMjdjODdhNmI1MzhlOTQ0OCIKICAgIH0KICB9Cn0=",
+      "signature": "URSAEVdYbUb2fTN7sbq09Aheg2Pj82AXXK2eJ96QR2xEiJRPx3H5oyoyI7Kie29hbmHC42uN7/yLnmn9GB0epesqv0Vk3CHjQaAggve4b5B6aU72+UibQuGnD5VN5KrBcSaq52JPIipDYBBqxy2BpCQg2yL7IfkVnpoQiC8npMFeSvLajMKkPVPOuwQPiTuADvMB66ye83vHMAohgddRC8AiU2QWIY0oY/gLOSsOUffmupyvKZVqZi7fntx8wLX1PUeTNijporb8NLdfAXmbdkbbPKWEMvTBfj0mta2vFCRXCn64MY8KcVvau77X4F4yQK6BEX3QpHZMTupgsbORwd78pwuEp4U9zS+MWTqYkGc1r5eRTk2G/6bGaLXzV3jPW1MHuqV532dCj5FMl2QDrrDi7b8xn19A5ZGDRNtShwkYYsOwX4CRI+A4Jnm1L8hQc3hRBNLmQXqd9yHUTPuWLYaMzF9BfFG5m56kZCl3afRz+ytdpCj4itDzUD1IQ2FVCIWmQJc+SnFoES4HOGer4SNWb+igTfLdtvTGaBrKvy24zr5gdX7qroIj8WXJ0TrvYUT3mTDJzzHNtJjqlAs1+6NslbmcxCk1rRfTt7GPDqx/y5HcRd9vffSFSmA5aoCg7/jI0A7K73zACWP0aLQqNyITo8YNzvY4Ja5j6cwA6w4="
+
+    },
+    "description": [
+      "",
+      "",
+      "  &6Увлекательный режим, в котором игрокам",
+      "&6выдаётся роль убийцы, детектива или гражданского",
+      "  &6Убийца должен быть хитрым",
+      "&6и попытаться убить как можно больше людей,",
+      "&6будучи не пойманным или убитым.",
+      "  &6Детектив и гражданские должны работать в команде,",
+      "&6чтобы защитить друг друга и попытаться выяснить,",
+      "&6кто же всё таки убийца",
+      "",
+      " &eНе забывай прописывать &7gg &eпосле завершения игры,",
+      "&eкарма.. карма.. и ещё раз карма!",
+      ""
+    ]
+  },
+  {
+    "menu-id": 52,
+    "id": "BuildBattle",
+    "name": "&6Build&eBattle",
+    "material": "DIAMOND_PICKAXE",
+    "arcade": false,
+    "npc": {
+      "position": {
+        "x": 158.5,
+        "y": 91,
+        "z": 19.5,
+        "world": "hub"
+      },
+      "texture": "ewogICJ0aW1lc3RhbXAiIDogMTYwNjU5NTQ0MTE2NSwKICAicHJvZmlsZUlkIiA6ICI2MTI4MTA4MjU5M2Q0OGQ2OWIzMmI3YjlkMzIxMGUxMiIsCiAgInByb2ZpbGVOYW1lIiA6ICJPbGROaWNrVGhlUmVhcGVyIiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlL2FmNDFlMjU2MWEyYzk1OWY1NmRmNWRjZGE1NjQzOTdkZjE5NzFkNjUyZTFhYzE1OWQ4YjRjNzQ3MzMwMjYwNzciLAogICAgICAibWV0YWRhdGEiIDogewogICAgICAgICJtb2RlbCIgOiAic2xpbSIKICAgICAgfQogICAgfQogIH0KfQ==",
+      "signature": "K/yiRw60yN4k1JPR/35/5bqkt5pI7pqW8V+1dzmsOzSX44DSNZQLxYl90CGZRX8pWwnyx3kQQD1KBo47PSuu7IHFGKV9UV9iBUt7gtarO0bguISdhPddVsVTUIIsby0rkWsqLYrbHgnQR5vErM0HRNkagkR+d68+G55IKJGA3qabyI1F7yETT9AfjyJVqDot0ySk+dwDtd1wDO91r/TfNLHpSOM4/JVZfpvIfnX9xEDx+++nPECpq3TfooH6BcGpAZwRHQgHVXeUoZkKwHjiPlJjbaHCF/YIU900XCk1KfYR5bmsRQgauwv1B6jDpB8KsbXpPpXkuuFBJNnLCQKGIo/Wr0uEhsV/tUf7BxSG48ONSS+jrtX6i6Zhz7M9CjuEyP2/SMjR8aHZbMcy1z4Q9vgC5/pYgWsMh4zeGyr/8O08nKr2d/IlzEkO8bFo47NoahFLtkzAIVEo8Yn0B8ROvmRjLJpX1KcHeXOTUHMVqFFzRmPYpoor3l22EEMhY6kYTOCf1lC0xwz9a0IH3XjHCFht5jIfi2Zmf1MR+sXSC0XvU5moHSwYkP1XQAX2P9LJq/eXB8pOhZOAdnVkqfo3nFLtpFgGckANhuxrirOmPEgnMuUJ3B/IWmj8LuiWD0aP2EtZF5imB2ZyNK/atoc1EnwSYNPcNPMy4ZrLPl38nmE="
+
+    },
+    "description": [
+      "",
+      "",
+      "  &6Режим, в котором вы сможете",
+      "&6продемонстрировать свои навыки строительства",
+      "  &6Игроки соревнуются друг с другом,",
+      "&6чтобы увидеть, у кого же лучше постройка,",
+      "&6на заданную им тему",
+      "  &6Идеально подходит для всех игроков,",
+      "&6которые любят строить или создавать что-то в игре",
+      "",
+      "&fВариации:",
+      "&d- &6Build&eBattle &fSolo",
+      "&d- &6Build&eBattle &2Team",
+      "&d- &6GuessTheBuild",
+      ""
+    ]
+  },
+  {
+    "menu-id": 46,
+    "id": "KitPvP",
+    "name": "&2KitPvP",
+    "material": "DIAMOND_SWORD",
+    "arcade": false,
+    "npc": {
+      "position": {
+        "x": 160.5,
+        "y": 91,
+        "z": 21.5,
+        "world": "hub"
+      },
+      "texture": "eyJ0aW1lc3RhbXAiOjE1ODU0MjQ1Mjc5NzgsInByb2ZpbGVJZCI6ImIwZDczMmZlMDBmNzQwN2U5ZTdmNzQ2MzAxY2Q5OGNhIiwicHJvZmlsZU5hbWUiOiJPUHBscyIsInNpZ25hdHVyZVJlcXVpcmVkIjp0cnVlLCJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODNiZWQ0YmJkNzk2YTkxYTJmMTlmMTZlOWMwMjExZGIxMWEzZjgwOTQzZTBlOWM4MmU2MzEzYjU5ZWRkODE5MSJ9fX0=",
+      "signature": "YfT5V8c+G0DF/kpF5mcO5ZTEWU1DqZ3UnQrxacfNM3GQcTfQ9QVJv5dF7CR7bwGGb9fWe2vsbi+Cw7BlMfZ644QXKCH9WQvV+B/ekAuPuIc57LSB/ycRJ83DCRz7SwoOKe9Ck6iMjAPev0Ckx7uIduwssfgAghinSD0AMc7sYPYkcEMr+0+zz41xjDdRSAu9gK5mryzfjJW6mtiP9gXlY7yHGYmY7G5oSK16bzl4ZkGsT/I3ZNP9vqUCm484zvsUK8vlAxKepwansS1oN/OsxsNRXi9vs3XIeHFOsXgsySSzLJOmY1L/vx1mnQXpMYaKZP48Q7yGoX/qjb83Z18XmHtzKobloRdOnLh1stupXh27jYQcrNF4cNQbL9+L2XB9s+dpkI2zYYGNC5MiTtQlZNnQ76nlIjwq8YaUycJIZXzLUnCmQdbAlkucJlzLo74AA8Lq2sjkXKXpOy2HT0jhB2TY+LtKdeLUVN4mfdAh4UxS2PhVp3bfrJ51uGaEgAp761e3aZy1KhrgHqRyplVKUwHWGiSL3XPCpxfCkAQbm88gwxh8h+KvikKWn10fRD9c3fDvwGidaoYBhUHB+Xj8Ob5CxI6vKHjOQnOFQ761J8Hp536F9Ygu+kL4Jx+x+UYeGa+FqiO91bZt9MYbr4wSiqX9WnYAhlmCA6DAv5w9WqM="
+
+    },
+    "description": [
+      "",
+      "",
+      "  &6Режим в котором, главная задача игры —",
+      "&6убивать других игроков в бесконечном PvP-сражении,",
+      "&6повышая своё место в общем рейтинге",
+      "",
+      " &eДостоин ли ты, называть себя великим воином?",
+      ""
+    ]
+  },
+  {
+    "menu-id": 33,
+    "id": "SkyBlock",
+    "name": "&3Sky&2&lBlock",
+    "material": "GRASS",
+    "arcade": false,
+    "npc": {
+      "position": {
+        "x": 158.5,
+        "y": 90.5,
+        "z": 13.5,
+        "world": "hub"
+      },
+      "texture": "eyJ0aW1lc3RhbXAiOjE1NDE4MzM5MjI1NDUsInByb2ZpbGVJZCI6ImVmYWY1NzU3NzgxZTQ3YWViYzE0Y2Q4MmM5MWM3ZjgyIiwicHJvZmlsZU5hbWUiOiJNaW5lU2tpbiIsInNpZ25hdHVyZVJlcXVpcmVkIjp0cnVlLCJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWI3OGNjMjc4YmYxY2U2OGI5NGUxNWRjYzMxYTY2N2M0YWM3YmZhNTVlY2ZmOTgwNmE4MzQzYWRkYmQzMjA1YSJ9fX0=",
+      "signature": "gSb7EQ9qvWZI9x+55NBByafhIew4SYsxiqxy6k7PZGNL8QScLgNVE098/Vx3OtdXyhrnBt3qbTORmB9PxMAqRkesDZZc9Xhph1XjBqSb1TqHzQqRw4X9TTq1e9VMj5hDudZXa/OUfcDoS63HpZ6PmRmpzYI0k/OSeV5vhBVuRKxPrvFXBdfYVa4i91FF/lkbdXCuZRfiKYNCjrF0w3371ngtZAcziirAFRH1jQacsnezbqRTeOxXB8ADOyEiMJORUXSeHMHLXJunSKp8zkF9vLEu9MBa04ZVCaEyhNUzfP/sxWJpjdWlG7PSVo36uRnUqMZQPTOUyjkm5ZxjwkENRI2GcDnGBEV4BRZcLZQw43KrkpjaAnSGsGFAYbxtQqtshtgkJtKzzL3x+Knz/FBI7aajkKpLRpai4Z65C/QfE8jiB2NBKJripzO9Q3X1q8sRRf+xnQBA3H9u5pi2kJz99tAHMmycelkvMVoGleV+RqREqQYLWXN+7zv185aRC04RlIqDwiN9UmkXXPpO4Pr+CV8xS4FAifjeFt3DQRVXkmYYmjU8tXu2nlVoy5JNFFK+Ei9BceqRYx3GwL1AG+2NT/bpVbCQh1jsQvwhv62iBYmCs1W5LpJcY3A5z5mG/kTwvuXAiRAN1qzBLvB3IYMq10nPxcmaGAH52nfP1P++dag="
+
+    },
+    "description": [
+      "",
+      "",
+      "  &6Режим с выживанием на острове в пустоте",
+      "&6Вы попадаете в среду, где приходится",
+      "&6в ограниченном пространстве и средствах развить свой остров",
+      "",
+      " &eТебе даётся ведро лавы и два куска льда,",
+      "&eчто ты сможешь с этим сделать?",
+      ""
+    ]
+  },
+  {
+    "menu-id": 11,
+    "id": "Parkour",
+    "name": "&eПаркуры",
+    "material": "GLASS",
+    "arcade": true,
+    "npc": {
+      "position": {
+        "x": 170.5,
+        "y": 91,
+        "z": 17.5,
+        "world": "hub"
+      },
+      "texture": "eyJ0aW1lc3RhbXAiOjE1NDE4MzM5MjI1NDUsInByb2ZpbGVJZCI6ImVmYWY1NzU3NzgxZTQ3YWViYzE0Y2Q4MmM5MWM3ZjgyIiwicHJvZmlsZU5hbWUiOiJNaW5lU2tpbiIsInNpZ25hdHVyZVJlcXVpcmVkIjp0cnVlLCJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWI3OGNjMjc4YmYxY2U2OGI5NGUxNWRjYzMxYTY2N2M0YWM3YmZhNTVlY2ZmOTgwNmE4MzQzYWRkYmQzMjA1YSJ9fX0==",
+      "signature": "gSb7EQ9qvWZI9x+55NBByafhIew4SYsxiqxy6k7PZGNL8QScLgNVE098/Vx3OtdXyhrnBt3qbTORmB9PxMAqRkesDZZc9Xhph1XjBqSb1TqHzQqRw4X9TTq1e9VMj5hDudZXa/OUfcDoS63HpZ6PmRmpzYI0k/OSeV5vhBVuRKxPrvFXBdfYVa4i91FF/lkbdXCuZRfiKYNCjrF0w3371ngtZAcziirAFRH1jQacsnezbqRTeOxXB8ADOyEiMJORUXSeHMHLXJunSKp8zkF9vLEu9MBa04ZVCaEyhNUzfP/sxWJpjdWlG7PSVo36uRnUqMZQPTOUyjkm5ZxjwkENRI2GcDnGBEV4BRZcLZQw43KrkpjaAnSGsGFAYbxtQqtshtgkJtKzzL3x+Knz/FBI7aajkKpLRpai4Z65C/QfE8jiB2NBKJripzO9Q3X1q8sRRf+xnQBA3H9u5pi2kJz99tAHMmycelkvMVoGleV+RqREqQYLWXN+7zv185aRC04RlIqDwiN9UmkXXPpO4Pr+CV8xS4FAifjeFt3DQRVXkmYYmjU8tXu2nlVoy5JNFFK+Ei9BceqRYx3GwL1AG+2NT/bpVbCQh1jsQvwhv62iBYmCs1W5LpJcY3A5z5mG/kTwvuXAiRAN1qzBLvB3IYMq10nPxcmaGAH52nfP1P++dag="
+
+    },
+    "description": [
+      "",
+      "",
+      "  &6Адский режим, где нужно паркурить по блокам",
+      "&6на заданной вам карте",
+      "  &6Попробуйте не отчаяться и пройти все карты,",
+      "&6чтобы доказать что ты лучший паркурщик",
+      "",
+      " &eСможете ли вы пройти все карты?",
+      ""
+    ]
+  },
+  {
+    "menu-id": 13,
+    "id": "Duels112",
+    "name": "&cДуэли",
+    "material": "ELYTRA",
+    "arcade": true,
+    "npc": {
+      "position": {
+        "x": 170.5,
+        "y": 91,
+        "z": 17.5,
+        "world": "hub"
+      },
+      "texture": "eyJ0aW1lc3RhbXAiOjE1NDE4MzM5MjI1NDUsInByb2ZpbGVJZCI6ImVmYWY1NzU3NzgxZTQ3YWViYzE0Y2Q4MmM5MWM3ZjgyIiwicHJvZmlsZU5hbWUiOiJNaW5lU2tpbiIsInNpZ25hdHVyZVJlcXVpcmVkIjp0cnVlLCJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWI3OGNjMjc4YmYxY2U2OGI5NGUxNWRjYzMxYTY2N2M0YWM3YmZhNTVlY2ZmOTgwNmE4MzQzYWRkYmQzMjA1YSJ9fX0==",
+      "signature": "gSb7EQ9qvWZI9x+55NBByafhIew4SYsxiqxy6k7PZGNL8QScLgNVE098/Vx3OtdXyhrnBt3qbTORmB9PxMAqRkesDZZc9Xhph1XjBqSb1TqHzQqRw4X9TTq1e9VMj5hDudZXa/OUfcDoS63HpZ6PmRmpzYI0k/OSeV5vhBVuRKxPrvFXBdfYVa4i91FF/lkbdXCuZRfiKYNCjrF0w3371ngtZAcziirAFRH1jQacsnezbqRTeOxXB8ADOyEiMJORUXSeHMHLXJunSKp8zkF9vLEu9MBa04ZVCaEyhNUzfP/sxWJpjdWlG7PSVo36uRnUqMZQPTOUyjkm5ZxjwkENRI2GcDnGBEV4BRZcLZQw43KrkpjaAnSGsGFAYbxtQqtshtgkJtKzzL3x+Knz/FBI7aajkKpLRpai4Z65C/QfE8jiB2NBKJripzO9Q3X1q8sRRf+xnQBA3H9u5pi2kJz99tAHMmycelkvMVoGleV+RqREqQYLWXN+7zv185aRC04RlIqDwiN9UmkXXPpO4Pr+CV8xS4FAifjeFt3DQRVXkmYYmjU8tXu2nlVoy5JNFFK+Ei9BceqRYx3GwL1AG+2NT/bpVbCQh1jsQvwhv62iBYmCs1W5LpJcY3A5z5mG/kTwvuXAiRAN1qzBLvB3IYMq10nPxcmaGAH52nfP1P++dag="
+    },
+    "description": [
+      "",
+      "",
+      "  &6В дуэлях игроки соревнуются друг с другом",
+      "&6в различных игровых режимах",
+      "  &6В режимах, вы выбираете свою настройку",
+      "&6и сражаетесь с противником за то,",
+      "&6чтобы занять первое место в рейтинге",
+      "",
+      " &eСможете ли вы попасть в таблицу лидеров?",
+      ""
+    ]
+  },
+  {
+    "menu-id": 15,
+    "id": "GunGame",
+    "name": "&aGunGame",
+    "material": "GOLD_SWORD",
+    "arcade": true,
+    "npc": {
+      "position": {
+        "x": 0,
+        "y": -40,
+        "z": 0,
+        "world": "hub"
+      },
+      "texture": "",
+      "signature": ""
+
+    },
+    "description": [
+      "",
+      "&6Убей или будь убитым"
+    ]
+  },
+  {
+    "menu-id": 21,
+    "id": "TNTRun",
+    "name": "&cTNTRun",
+    "material": "TNT",
+    "arcade": true,
+    "npc": {
+      "position": {
+        "x": 0,
+        "y": -40,
+        "z": 0,
+        "world": "hub"
+      },
+      "texture": "",
+      "signature": ""
+
+    },
+    "description": [
+      "",
+      "&6Беги или умри!"
+    ]
+  },
+  {
+    "menu-id": 23,
+    "id": "MobWars",
+    "name": "&eMob&aWars",
+    "material": "SKULL_ITEM",
+    "material-data": 4,
+    "arcade": true,
+    "npc": {
+      "position": {
+        "x": 0,
+        "y": -40,
+        "z": 0,
+        "world": "hub"
+      },
+      "texture": "",
+      "signature": ""
+
+    },
+    "description": [
+      "",
+      "&7В разработке..."
+    ]
+  },
+  {
+    "menu-id": 31,
+    "id": "Prison",
+    "name": "&aPrison",
+    "material": "IRON_PICKAXE",
+    "arcade": true,
+    "npc": {
+      "position": {
+        "x": 0,
+        "y": -40,
+        "z": 0,
+        "world": "hub"
+      },
+      "texture": "",
+      "signature": ""
+
+    },
+    "description": [
+      "",
+      "&7В разработке..."
+    ]
+  }
+
+]

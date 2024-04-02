@@ -1,17 +1,14 @@
-package com.pepej.gammanetwork.messages
+package com.pepej.gammanetwork.module
 
-import PlayerMessage
-import com.pepej.gammanetwork.GammaNetwork
-import com.pepej.gammanetwork.utils.distance
-import com.pepej.gammanetwork.utils.getChannel
-import com.pepej.gammanetwork.utils.getServiceUnchecked
-import com.pepej.gammanetwork.utils.metadata
+import com.pepej.gammanetwork.GammaNetworkPlugin
+import com.pepej.gammanetwork.messages.CHAT
+import com.pepej.gammanetwork.messages.ChatType
+import com.pepej.gammanetwork.messages.PlayerMessage
+import com.pepej.gammanetwork.utils.*
 import com.pepej.papi.command.Commands
 import com.pepej.papi.events.Events
-import com.pepej.papi.messaging.Messenger
 import com.pepej.papi.scheduler.Schedulers
 import com.pepej.papi.terminable.TerminableConsumer
-import com.pepej.papi.terminable.module.TerminableModule
 import com.pepej.papi.text.Text.colorize
 import com.pepej.papi.utils.Players
 import net.luckperms.api.LuckPerms
@@ -20,14 +17,13 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.player.AsyncPlayerChatEvent
 
 
-object GlobalChatMessageSystem : TerminableModule {
+object GlobalChatModule : NetworkModule("GlobalChat") {
 
-    private val messenger: Messenger = getServiceUnchecked()
     private val luckPerms: LuckPerms = getServiceUnchecked()
-    private val config = GammaNetwork.instance.configuration.chat
+    private val config = GammaNetworkPlugin.instance.configuration.chat
     private val channel = messenger.getChannel<PlayerMessage>("global-chat-channel")
 
-    override fun setup(consumer: TerminableConsumer) {
+    override fun onEnable(consumer: TerminableConsumer) {
         Events.subscribe(AsyncPlayerChatEvent::class.java, EventPriority.HIGHEST)
             .filter {
                 it.player.metadata().has(CHAT) && it.player.metadata()
@@ -35,30 +31,36 @@ object GlobalChatMessageSystem : TerminableModule {
             }
             .handler {
                 it.isCancelled = true
-                val player = it.player
+                val (uuid, name) = it.player.wrapAsPlayer()
                 channel.sendMessage(
                     PlayerMessage(
-                        player.uniqueId,
-                        player.displayName,
-                        GammaNetwork.instance.serverId,
-                        it.message
+                        uuid,
+                        name,
+                        it.message,
+                        GammaNetworkPlugin.instance.serverId
                     )
                 )
             }.bindWith(consumer)
         Events.subscribe(AsyncPlayerChatEvent::class.java)
-            .filter { GammaNetwork.instance.configuration.chat.enable }
-            .filter { !it.player.metadata().has(CHAT) || it.player.metadata().getOrDefault(CHAT, ChatType.NOT_PRESENT) == ChatType.NOT_PRESENT }
-            .handler {
-                it.isCancelled = true
-                var message = it.message
-                val sender = it.player
+            .filter { config.enable }
+            .filter {
+                !it.player.metadata().has(CHAT) || it.player.metadata().getOrDefault(
+                    CHAT,
+                    ChatType.NOT_PRESENT
+                ) == ChatType.NOT_PRESENT
+            }
+            .handler { event ->
+                event.isCancelled = true
+                var message = event.message
+                val sender = event.player
                 val luckPermsUser = luckPerms.userManager.getUser(sender.uniqueId) ?: return@handler
                 val metadata = luckPermsUser.cachedData.metaData
+                val global = message.isNotEmpty() && message.first() == '!'
                 if (sender.hasPermission("gammachat.chat.admin")) {
                     message = colorize(config.adminMessageColor.format + message)
                 }
-                if (GammaNetwork.instance.configuration.chat.enableSplitting) {
-                    if (message.isNotEmpty() && message.first() == '!') {
+                if (config.enableSplitting) {
+                    if (global) {
                         message = message.substring(1)
                         if (sender.hasPermission("gammachat.chat.admin")) {
                             message = colorize(config.adminMessageColor.format + message)
@@ -78,10 +80,8 @@ object GlobalChatMessageSystem : TerminableModule {
                             }
                     } else {
                         Players.all()
-                            .filter { r ->
-                                r.location.world.name == sender.location.world.name &&
-                                        r.location distance sender.location < config.localChatRadius
-                            }
+                            .filter { it.location.world.name == sender.location.world.name }
+                            .filter { it.location distance sender.location < config.localChatRadius }
                             .forEach { player ->
                                 player.sendMessage(
                                     colorize(
@@ -99,19 +99,18 @@ object GlobalChatMessageSystem : TerminableModule {
 
             }.bindWith(consumer)
         Commands.create()
-            .assertPlayer()
             .assertPermission("gammachat.globalchat")
             .assertUsage("[message]")
             .handler {
-                val player = it.sender()
+                val (uuid, name) = it.sender().wrapAsPlayer()
                 if (it.args().isNotEmpty()) {
                     val message = it.args().joinToString(" ")
                     channel.sendMessage(
                         PlayerMessage(
-                            player.uniqueId,
-                            player.displayName,
-                            GammaNetwork.instance.serverId,
-                            message
+                            uuid,
+                            name,
+                            message,
+                            GammaNetworkPlugin.instance.serverId
                         )
                     )
 

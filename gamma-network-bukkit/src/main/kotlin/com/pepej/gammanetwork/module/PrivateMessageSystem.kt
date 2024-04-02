@@ -1,17 +1,13 @@
-package com.pepej.gammanetwork.messages
+package com.pepej.gammanetwork.module
 
 import com.pepej.gammanetwork.utils.getConversationChannel
-import com.pepej.gammanetwork.utils.getServiceUnchecked
 import com.pepej.papi.command.Commands
-import com.pepej.papi.messaging.Messenger
 import com.pepej.papi.messaging.conversation.ConversationMessage
 import com.pepej.papi.messaging.conversation.ConversationReply
 import com.pepej.papi.messaging.conversation.ConversationReplyListener
 import com.pepej.papi.messaging.conversation.ConversationReplyListener.RegistrationAction
-import com.pepej.papi.network.Network
 import com.pepej.papi.scheduler.Schedulers
 import com.pepej.papi.terminable.TerminableConsumer
-import com.pepej.papi.terminable.module.TerminableModule
 import com.pepej.papi.text.Text.colorize
 import com.pepej.papi.utils.TabHandlers
 import org.bukkit.Bukkit
@@ -19,10 +15,8 @@ import org.bukkit.entity.Player
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-object PrivateMessageSystem  : TerminableModule {
+object PrivateMessageSystem  : NetworkModule("PrivateMessages") {
 
-    private val messenger: Messenger = getServiceUnchecked()
-    private val network: Network = getServiceUnchecked()
     private val channel = messenger.getConversationChannel<PrivateMessage, PrivateMessageReply>("private-messages")
     private fun sendMessage(from: Player, to: String, message: String) {
 
@@ -61,7 +55,7 @@ object PrivateMessageSystem  : TerminableModule {
         }
     }
 
-    override fun setup(consumer: TerminableConsumer) {
+    override fun onEnable(consumer: TerminableConsumer) {
         channel.newAgent { _, message ->
             val reply = Schedulers.sync().supply {
                 val player = Bukkit.getPlayer(message.to) ?: return@supply null

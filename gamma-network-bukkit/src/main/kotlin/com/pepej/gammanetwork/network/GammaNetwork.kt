@@ -9,12 +9,8 @@ import com.pepej.papi.event.bus.api.EventSubscriber
 import com.pepej.papi.event.bus.api.PostResult
 import com.pepej.papi.event.bus.api.SimpleEventBus
 import com.pepej.papi.events.Events
-import com.pepej.papi.internal.LoaderUtils
 import com.pepej.papi.messaging.InstanceData
 import com.pepej.papi.messaging.Messenger
-import com.pepej.papi.messaging.codec.GZipCodec
-import com.pepej.papi.messaging.codec.GsonCodec
-import com.pepej.papi.messaging.codec.Message
 import com.pepej.papi.network.Network
 import com.pepej.papi.network.Server
 import com.pepej.papi.network.event.NetworkEvent
@@ -31,7 +27,10 @@ import com.pepej.papi.utils.Log
 import com.pepej.papi.utils.Players
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import org.bukkit.event.player.*
+import org.bukkit.event.player.PlayerEvent
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerKickEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -39,10 +38,10 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
-open class NetworkModule(protected val messenger: Messenger, protected val instanceData: InstanceData) : Network {
+open class GammaNetwork(protected val messenger: Messenger, protected val instanceData: InstanceData) : Network {
     private val compositeTerminable: CompositeTerminable = CompositeTerminable.create()
     private val eventBus: EventBus<NetworkEvent> = SimpleEventBus(NetworkEvent::class.java)
-    private val log = LoggerFactory.getLogger(NetworkModule::class.java)
+    private val log = LoggerFactory.getLogger(GammaNetwork::class.java)
     private val eventsChannel = messenger.getChannel("pnet-events", EventMessage::class.java).apply {
         newAgent { _, message ->
             when (message.type) {
@@ -74,6 +73,7 @@ open class NetworkModule(protected val messenger: Messenger, protected val insta
         val disconnectListener: EventSubscriber<ServerDisconnectEvent> =
             object : EventSubscriber<ServerDisconnectEvent> {
                 override fun invoke(event: ServerDisconnectEvent) {
+                    log.info("Server disconnected: $event")
                     if (event.id == instanceData.id) {
                         val message = EventMessage(
                             id = event.id,
@@ -88,13 +88,6 @@ open class NetworkModule(protected val messenger: Messenger, protected val insta
                 }
             }
         eventBus.register(ServerDisconnectEvent::class.java, disconnectListener)
-        LoaderUtils.getPlugin().bind(AutoCloseable {
-            postEvent(
-                ServerDisconnectEvent(
-                    instanceData.id, "stopping"
-                )
-            )
-        })
         registerMetadataProviders()
         val connectionMessage = EventMessage(
             id = instanceData.id,
@@ -123,12 +116,11 @@ open class NetworkModule(protected val messenger: Messenger, protected val insta
             }
             .bindWith(this.compositeTerminable)
 
-        Events.subscribe(AsyncPlayerPreLoginEvent::class.java)
-            .filter { it.loginResult == AsyncPlayerPreLoginEvent.Result.ALLOWED }
+        Events.subscribe(PlayerJoinEvent::class.java)
             .handler {
                 var message = produceStatusMessage()
                 message = message.copy(players = message.players.toMutableMap().apply {
-                    put(it.uniqueId, it.name)
+                    put(it.player.uniqueId, it.player.name)
                 })
                 statusChannel.sendMessage(message)
             }
@@ -141,7 +133,7 @@ open class NetworkModule(protected val messenger: Messenger, protected val insta
         this.registerMetadataProvider(TpsMetadataProvider.INSTANCE)
     }
 
-    private fun postEvent(event: NetworkEvent) {
+     fun postEvent(event: NetworkEvent) {
         try {
             eventBus.post(event).raise()
         } catch (var3: PostResult.CompositeException) {

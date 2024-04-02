@@ -2,14 +2,12 @@ package com.pepej.gammanetwork.module
 
 import com.pepej.gammanetwork.utils.GAMMA_GREEN
 import com.pepej.gammanetwork.utils.GAMMA_RED
-import com.pepej.gammanetwork.utils.getServiceUnchecked
 import com.pepej.papi.command.Commands
 import com.pepej.papi.event.filter.EventFilters
 import com.pepej.papi.events.Events
-import com.pepej.papi.network.Network
 import com.pepej.papi.network.Server
 import com.pepej.papi.scheduler.Schedulers
-import com.pepej.papi.terminable.composite.CompositeTerminable
+import com.pepej.papi.terminable.TerminableConsumer
 import com.pepej.papi.time.DurationFormatter
 import com.pepej.papi.time.Time
 import com.pepej.papi.utils.Players
@@ -18,15 +16,9 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.player.PlayerJoinEvent
 import java.time.Instant
 
-object NetworkSummaryModule : NetworkModule {
+internal object NetworkSummaryModule : NetworkModule("Summary") {
 
-    private val network: Network = getServiceUnchecked()
-    override val name = "Summary"
-    override var scope: CompositeTerminable? = CompositeTerminable.create()
-    override var enabled = false
-
-    override fun onEnable() {
-        scope?.let {
+    override fun onEnable(consumer: TerminableConsumer) {
             Commands.create()
                 .assertPermission("network.summary")
                 .assertUsage("[server]")
@@ -41,7 +33,7 @@ object NetworkSummaryModule : NetworkModule {
                         sendAllSeversSummary(ctx.sender(), network.servers.values)
                     }
 
-                }.registerAndBind(it, "online", "netsum")
+                }.registerAndBind(consumer, "online", "netsum")
 
             Events.subscribe(PlayerJoinEvent::class.java, EventPriority.MONITOR)
                 .filter(EventFilters.playerHasPermission("network.summary.onjoin"))
@@ -49,8 +41,7 @@ object NetworkSummaryModule : NetworkModule {
                     Schedulers.sync().runLater({
                         sendAllSeversSummary(it.player, network.servers.values)
                     }, 1L)
-                }.bindWith(it)
-        }
+                }.bindWith(consumer)
     }
     private fun sendAllSeversSummary(sender: CommandSender, servers: Collection<Server>) {
         sendHeader(sender)

@@ -1,7 +1,6 @@
 package com.pepej.gammanetwork.redirect
 
 import com.google.gson.JsonElement
-import com.pepej.gammanetwork.GammaNetwork.Companion.instance
 import com.pepej.papi.events.Events
 import com.pepej.papi.messaging.InstanceData
 import com.pepej.papi.messaging.Messenger
@@ -153,7 +152,7 @@ class GammaNetworkRedirectSystem(
         loginEventListener.close()
     }
 
-    private data class RequestMessage(
+    data class RequestMessage(
         val convoId: UUID,
         val targetServer: String,
         val uuid: UUID,
