@@ -11,14 +11,14 @@ internal object NetworkStatusModule : NetworkModule("Status") {
     override fun onEnable(consumer: TerminableConsumer) {
         val bus = network.eventBus
         Subscribers.register(bus, ServerConnectEvent::class.java) {
-            network.broadcast("&b${it.id} &7подключен.")
+            broadcast("&b${it.id} &7подключен.")
         }
             .bindWith(consumer)
         Subscribers.register(bus, ServerDisconnectEvent::class.java) {
             if (it.reason?.isEmpty() == false) {
-                network.broadcast("&b${it.id} &7отключен. (причина: ${it.reason})")
+                broadcast("&b${it.id} &7отключен. (причина: ${it.reason})")
             } else {
-                network.broadcast("&b${it.id} &7отключен. (причина неизвестна)")
+                broadcast("&b${it.id} &7отключен. (причина неизвестна)")
             }
         }.bindWith(consumer)
     }

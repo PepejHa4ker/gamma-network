@@ -14,6 +14,7 @@ import com.pepej.gammanetwork.network.GammaNetwork
 import com.pepej.gammanetwork.rcon.RconServer
 import com.pepej.gammanetwork.redirect.GammaNetworkRedirectSystem
 import com.pepej.gammanetwork.redirect.GammaNetworkRequestHandler
+import com.pepej.gammanetwork.redirect.RedirectLeaveListenerModule
 import com.pepej.gammanetwork.redirect.RedirectNetworkMetadataParameterProvider
 import com.pepej.gammanetwork.redirect.VelocityPlayerRedirector
 import com.pepej.papi.ap.Plugin
@@ -134,6 +135,7 @@ class GammaNetworkPlugin : PapiJavaPlugin(), RedisProvider, InstanceData {
         bindModule(FindCommandModule(network, arrayOf("find")))
         bindModule(DispatchModule(redis, this@GammaNetworkPlugin, arrayOf("dispatch", "exec")))
         bindModule(NetworkCommands)
+        bindModule(RedirectLeaveListenerModule)
         bindModule(ModuleManager)
         if (configuration.rcon.enable) {
                 val rconServer = RconServer(server, configuration.rcon)

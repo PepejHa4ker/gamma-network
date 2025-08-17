@@ -8,6 +8,7 @@ repositories {
 }
  
 dependencies {
+    compileOnly 'com.google.code.gson:gson:2.13.1'
     compileOnly("com.pepej:papi-core:2.6.1")
 }
 

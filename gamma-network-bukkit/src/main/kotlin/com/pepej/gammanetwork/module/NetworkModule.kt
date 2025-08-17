@@ -103,7 +103,7 @@ object ModuleManager : TerminableModule {
             module.disable()
         }
         if (fromNetwork) {
-            network.broadcast("Module $name ${if (enabled) "&aenabled" else "&cdisabled"}")
+            broadcast("Module $name ${if (enabled) "&aenabled" else "&cdisabled"}")
         }
         log.info("Module $name ${if (enabled) "enabled" else "disabled"}")
     }

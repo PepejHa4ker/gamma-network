@@ -65,6 +65,7 @@ object GlobalChatModule : NetworkModule("GlobalChat") {
                         if (sender.hasPermission("gammachat.chat.admin")) {
                             message = colorize(config.adminMessageColor.format + message)
                         }
+                        Bukkit.getConsoleSender().sendMessage(message)
                         Players.all()
                             .forEach { p ->
                                 p.sendMessage(
@@ -79,20 +80,20 @@ object GlobalChatModule : NetworkModule("GlobalChat") {
 
                             }
                     } else {
+                        val message = colorize(
+                            config.localFormat.format
+                                .replace("{suffix}", metadata.suffix ?: "")
+                                .replace("{prefix}", metadata.prefix ?: "")
+                                .replace("{username}", sender.name)
+                        )
+                            .replace("{message}", message)
                         Players.all()
                             .filter { it.location.world.name == sender.location.world.name }
                             .filter { it.location distance sender.location < config.localChatRadius }
                             .forEach { player ->
-                                player.sendMessage(
-                                    colorize(
-                                        config.localFormat.format
-                                            .replace("{suffix}", metadata.suffix ?: "")
-                                            .replace("{prefix}", metadata.prefix ?: "")
-                                            .replace("{username}", sender.name)
-                                    )
-                                        .replace("{message}", message)
-                                )
+                                player.sendMessage(message)
                             }
+                        Bukkit.getConsoleSender().sendMessage(message)
 
                     }
                 }
@@ -131,8 +132,10 @@ object GlobalChatModule : NetworkModule("GlobalChat") {
 
         channel.newAgent { agent, message ->
             Schedulers.sync().run {
+                val message = colorize("&c[Gamma] &a[${message.server}] ${message.displayName}&f: ${message.message}")
+                Bukkit.getConsoleSender().sendMessage(message)
                 Bukkit.broadcast(
-                    colorize("&c[Gamma] &a[${message.server}] ${message.displayName}&f: ${message.message}"),
+                    message,
                     "gammachat.global.notify"
                 )
             }

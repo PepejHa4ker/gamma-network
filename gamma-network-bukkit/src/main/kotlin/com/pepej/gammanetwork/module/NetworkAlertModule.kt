@@ -14,7 +14,7 @@ internal object NetworkAlertModule : NetworkModule("Alert") {
 
     private val channel = messenger.getChannel<ServerMessage>("alerts").apply {
         newAgent { _, (_, _, message) ->
-            network.broadcast(message)
+            broadcast(message)
         }
     }
 

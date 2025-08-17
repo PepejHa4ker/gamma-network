@@ -24,6 +24,7 @@ import java.util.*
 
 const val GAMMA_RED: String = "&7[&cGamma&7]"
 const val GAMMA_GREEN: String = "&7[&aGamma&7]"
+const val REDIRECT_TOKEN = "redirect-token"
 val EMPTY_UUID: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
 
 inline fun <reified T> Messenger.getChannel(channel: String) = this.getChannel(channel, T::class.java)
@@ -41,7 +42,7 @@ inline fun <reified T> getServiceUnchecked(): T {
 
 inline fun <reified T> typeTokenOf() = object : TypeToken<T>() {}
 
-fun Network.broadcast(message: String) {
+fun broadcast(message: String) {
     Players.stream()
         .filter { it.hasPermission("network.status.alerts") }
         .forEach { msg(it, "$GAMMA_GREEN &r$message") }

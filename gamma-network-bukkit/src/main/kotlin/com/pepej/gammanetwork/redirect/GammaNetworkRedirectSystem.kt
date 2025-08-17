@@ -1,7 +1,9 @@
 package com.pepej.gammanetwork.redirect
 
 import com.google.gson.JsonElement
+import com.pepej.gammanetwork.utils.REDIRECT_TOKEN
 import com.pepej.papi.events.Events
+import com.pepej.papi.gson.GsonProvider
 import com.pepej.papi.messaging.InstanceData
 import com.pepej.papi.messaging.Messenger
 import com.pepej.papi.messaging.conversation.ConversationMessage
@@ -26,7 +28,7 @@ class GammaNetworkRedirectSystem(
     messenger: Messenger,
     private val instanceData: InstanceData,
     private val redirector: PlayerRedirector,
-    private var connectionTimeout: Long = 5,
+    connectionTimeout: Long = 5,
 ) : RedirectSystem {
     private val channel = messenger.getConversationChannel("network-redirect", RequestMessage::class.java, ResponseMessage::class.java)
     private val log = LoggerFactory.getLogger(GammaNetworkRedirectSystem::class.java)
@@ -93,6 +95,12 @@ class GammaNetworkRedirectSystem(
         profile: Profile,
         params: MutableMap<String, JsonElement>
     ): Promise<RedirectSystem.ReceivedResponse> {
+        if (!params.containsKey(REDIRECT_TOKEN)) {
+            val token = UUID.randomUUID().toString()
+            params[REDIRECT_TOKEN] = GsonProvider.standard().toJsonTree(token)
+            log.debug("Generated redirect token {} for player {}", token, profile.uniqueId)
+        }
+
         val req = RequestMessage(
             UUID.randomUUID(),
             serverId,

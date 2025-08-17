@@ -66,7 +66,7 @@ open class GammaNetwork(protected val messenger: Messenger, protected val instan
 
     private val statusChannel = messenger.getChannel("pnet-status", StatusMessage::class.java)
 
-    private val metadataProviders: MutableList<ServerMetadataProvider> = CopyOnWriteArrayList<ServerMetadataProvider>()
+    private val metadataProviders: MutableList<ServerMetadataProvider> = CopyOnWriteArrayList()
     private val servers: MutableMap<String, ServerImpl> = ConcurrentHashMap<String, ServerImpl>()
 
     init {
@@ -158,9 +158,9 @@ open class GammaNetwork(protected val messenger: Messenger, protected val instan
 
 
         val msg = StatusMessage(
-            time = System.currentTimeMillis(),
             id = instanceData.id,
             groups = ArrayList(instanceData.groups),
+            time = System.currentTimeMillis(),
             players = players,
             maxPlayers = Bukkit.getMaxPlayers(),
             whitelisted = Bukkit.hasWhitelist(),
