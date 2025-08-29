@@ -15,7 +15,7 @@ import org.bukkit.entity.Player
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-object PrivateMessageSystem  : NetworkModule("PrivateMessages") {
+object PrivateMessageSystem : NetworkModule("PrivateMessages") {
 
     private val channel = messenger.getConversationChannel<PrivateMessage, PrivateMessageReply>("private-messages")
     private fun sendMessage(from: Player, to: String, message: String) {
@@ -70,6 +70,7 @@ object PrivateMessageSystem  : NetworkModule("PrivateMessages") {
 
         Commands.create()
             .assertPlayer()
+            .assertUsage("<player> <message>")
             .tabHandler { context ->
                 TabHandlers.of(context.arg(0).toString(), *network.onlinePlayers.values.map { it.name.get() }.toTypedArray())
             }

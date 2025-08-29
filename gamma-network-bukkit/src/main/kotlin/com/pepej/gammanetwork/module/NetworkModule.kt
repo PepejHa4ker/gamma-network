@@ -44,6 +44,7 @@ abstract class NetworkModule(
 
 
     }
+
     fun disable() {
         if (!enabled) {
             log.warn("Module $id is already disabled")
@@ -72,13 +73,13 @@ abstract class NetworkModule(
         enable()
     }
 
-    fun isReloadable(): Boolean {
+    private fun isReloadable(): Boolean {
         return false
     }
+
     override fun close() {
         scope?.close()
     }
-
 }
 
 object ModuleManager : TerminableModule {
@@ -113,7 +114,7 @@ object ModuleManager : TerminableModule {
         modules.forEach { it.scope?.let(consumer::bind) }
         Commands.create()
             .assertPermission("network.modules.manage")
-//            .assertUsage("<module|all> <server|all> <enable|disable>")
+            .assertUsage("<module|all> <server|all> <enable|disable>")
             .tabHandler { context ->
                 when (context.args().size) {
                     1 -> {
