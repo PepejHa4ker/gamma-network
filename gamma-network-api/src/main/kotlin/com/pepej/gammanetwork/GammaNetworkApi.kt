@@ -6,8 +6,7 @@ import com.pepej.papi.services.Services
 
 class GammaNetworkApi {
 
-    fun init()
-    {
+    fun init() {
         Services.provide(EconomyRequester::class.java, GetBalanceReqResp)
     }
 }

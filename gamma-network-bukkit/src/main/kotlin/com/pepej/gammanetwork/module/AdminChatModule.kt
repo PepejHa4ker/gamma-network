@@ -41,6 +41,7 @@ object AdminChatModule : NetworkModule("AdminChat") {
                     )
                 )
             }.bindWith(consumer)
+
         Commands.create()
             .assertPlayer()
             .assertPermission("gammachat.adminchat")

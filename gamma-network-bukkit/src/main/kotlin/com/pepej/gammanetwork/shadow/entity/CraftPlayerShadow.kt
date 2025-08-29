@@ -12,7 +12,6 @@ interface CraftPlayerShadow : Shadow {
 
     fun getHandle(): EntityPlayerShadow
 
-
     companion object {
         @Contract("!null -> new;")
         @JvmStatic

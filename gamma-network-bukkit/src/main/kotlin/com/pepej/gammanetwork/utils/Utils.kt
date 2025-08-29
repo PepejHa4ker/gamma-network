@@ -25,9 +25,11 @@ import java.util.*
 const val GAMMA_RED: String = "&7[&cGamma&7]"
 const val GAMMA_GREEN: String = "&7[&aGamma&7]"
 const val REDIRECT_TOKEN = "redirect-token"
+
 val EMPTY_UUID: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
 
 inline fun <reified T> Messenger.getChannel(channel: String) = this.getChannel(channel, T::class.java)
+
 fun Player.asProfile(network: Network): Profile? {
     return network.onlinePlayers[this.uniqueId]
 }
@@ -58,7 +60,7 @@ data class UUIDAndName(val uuid: UUID, val name: String)
 fun CommandSender.wrapAsPlayer(): UUIDAndName =
     when (this) {
         is Player -> UUIDAndName(uniqueId, displayName)
-        is ConsoleCommandSender -> UUIDAndName(EMPTY_UUID, "Gamma")
+        is ConsoleCommandSender -> UUIDAndName(EMPTY_UUID, "Console")
         is RconCommandSender -> UUIDAndName(EMPTY_UUID, "RCon")
         else -> throw IllegalArgumentException("Unexpected sender")
 }
@@ -74,7 +76,7 @@ val RedirectSystem.Request.targetServer: String
 
 
 inline fun <reified T, reified R> Messenger.getConversationChannel(channel: String): ConversationChannel<T, R>
-        where T : ConversationMessage, R : ConversationMessage {
+        where R : Any, T : ConversationMessage, R : ConversationMessage {
     return this.getConversationChannel(channel, T::class.java, R::class.java)
 }
 

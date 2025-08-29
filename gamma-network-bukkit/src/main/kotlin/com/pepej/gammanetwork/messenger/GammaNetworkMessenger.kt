@@ -106,8 +106,6 @@ class GammaNetworkMessenger(credentials: RedisCredentials) : Redis {
     }
 
 
-
-
     override fun close() {
         if (listener != null) {
             listener?.unsubscribe()

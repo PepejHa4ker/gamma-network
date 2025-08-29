@@ -2,6 +2,7 @@ package com.pepej.gammanetwork.redirect
 
 import com.google.gson.JsonElement
 import com.pepej.gammanetwork.messages.CHAT
+import com.pepej.gammanetwork.module.SPY
 import com.pepej.papi.gson.GsonProvider
 import com.pepej.papi.metadata.Metadata
 import com.pepej.papi.metadata.MetadataKey
@@ -14,7 +15,7 @@ object RedirectNetworkMetadataParameterProvider : RedirectParameterProvider {
     override fun provide(profile: Profile, serverId: String): MutableMap<String, JsonElement> {
         val params = mutableMapOf<String, JsonElement>()
         provideForKey(profile.uniqueId, CHAT, params)
-
+        provideForKey(profile.uniqueId, SPY, params)
         return params
     }
 

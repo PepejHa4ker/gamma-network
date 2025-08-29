@@ -4,6 +4,7 @@ import com.google.gson.JsonElement
 import com.pepej.gammanetwork.event.player.ProfileRedirectEvent
 import com.pepej.gammanetwork.messages.CHAT
 import com.pepej.gammanetwork.messages.ChatType
+import com.pepej.gammanetwork.module.SPY
 import com.pepej.gammanetwork.utils.REDIRECT_TOKEN
 import com.pepej.gammanetwork.utils.getServiceUnchecked
 import com.pepej.gammanetwork.utils.targetServer
@@ -89,10 +90,14 @@ object GammaNetworkRequestHandler : RequestHandler {
     private fun extractMetadata(request: Request) {
         log.debug("Extracting metadata for request {}", request)
         val metadata = Metadata.provideForPlayer(request.profile.uniqueId)
+
         val jsonElement: JsonElement? = request.params[CHAT.id]
         val chatType = GsonProvider.standard().fromJson(jsonElement, ChatType::class.java)
         if (chatType != null) {
             metadata.put(CHAT, chatType)
         }
+
+        val spyEnabled = request.params[SPY.id]?.asBoolean ?: false
+        metadata.put(SPY, spyEnabled)
     }
 }

@@ -31,8 +31,6 @@ import net.luckperms.api.LuckPerms
 import net.luckperms.api.LuckPermsProvider
 import org.slf4j.LoggerFactory
 
-const val VERSION: Int = 8
-
 @Plugin(
     name = "gamma-network",
     version = "1.1.1",
@@ -138,18 +136,16 @@ class GammaNetworkPlugin : PapiJavaPlugin(), RedisProvider, InstanceData {
         bindModule(RedirectLeaveListenerModule)
         bindModule(ModuleManager)
         if (configuration.rcon.enable) {
-                val rconServer = RconServer(server, configuration.rcon)
-                val channelFuture = rconServer.bind(configuration.rcon.port)
-                val channel = channelFuture.awaitUninterruptibly().channel()
-                bindModule(rconServer)
-                if (!channel.isActive) {
-                    log.warn("Failed to bind Rcon. Address already in use? ({})", configuration.rcon.port)
-                } else {
-                    log.info("Rcon server started!")
-                }
-
+            val rconServer = RconServer(server, configuration.rcon)
+            val channelFuture = rconServer.bind(configuration.rcon.port)
+            val channel = channelFuture.awaitUninterruptibly().channel()
+            bindModule(rconServer)
+            if (!channel.isActive) {
+                log.warn("Failed to bind Rcon. Address already in use? ({})", configuration.rcon.port)
+            } else {
+                log.info("Rcon server started!")
+            }
         }
-
     }
 
     override fun onPluginDisable() {

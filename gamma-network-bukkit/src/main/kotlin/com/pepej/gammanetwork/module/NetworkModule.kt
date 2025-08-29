@@ -163,10 +163,6 @@ object ModuleManager : TerminableModule {
 
     data class ModuleUpdateMessage(val name: String, val enabled: Boolean)
 
-    fun getModules(): List<NetworkModule> {
-        return modules
-    }
-
     private fun init() {
         modules.add(NetworkMalformedProfileModule)
         modules.add(NetworkStatusModule)
@@ -175,7 +171,7 @@ object ModuleManager : TerminableModule {
         modules.add(AdminChatModule)
         modules.add(PrivateMessageSystem)
         modules.add(GlobalChatModule)
-        modules.add(NetworkVersionCheckerModule)
+        modules.add(SpyModule)
         modules.forEach { it.enable() }
 
     }

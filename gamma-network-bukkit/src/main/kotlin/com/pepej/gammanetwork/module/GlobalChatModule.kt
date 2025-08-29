@@ -1,11 +1,16 @@
 package com.pepej.gammanetwork.module
 
-import com.pepej.gammanetwork.GammaNetworkPlugin
+import com.pepej.gammanetwork.GammaNetworkPlugin.Companion.instance
 import com.pepej.gammanetwork.messages.CHAT
 import com.pepej.gammanetwork.messages.ChatType
 import com.pepej.gammanetwork.messages.PlayerMessage
-import com.pepej.gammanetwork.utils.*
+import com.pepej.gammanetwork.utils.distance
+import com.pepej.gammanetwork.utils.getChannel
+import com.pepej.gammanetwork.utils.getServiceUnchecked
+import com.pepej.gammanetwork.utils.metadata
+import com.pepej.gammanetwork.utils.wrapAsPlayer
 import com.pepej.papi.command.Commands
+import com.pepej.papi.command.context.CommandContext
 import com.pepej.papi.events.Events
 import com.pepej.papi.scheduler.Schedulers
 import com.pepej.papi.terminable.TerminableConsumer
@@ -13,133 +18,163 @@ import com.pepej.papi.text.Text.colorize
 import com.pepej.papi.utils.Players
 import net.luckperms.api.LuckPerms
 import org.bukkit.Bukkit
+import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 import org.bukkit.event.EventPriority
 import org.bukkit.event.player.AsyncPlayerChatEvent
-
 
 object GlobalChatModule : NetworkModule("GlobalChat") {
 
     private val luckPerms: LuckPerms = getServiceUnchecked()
-    private val config = GammaNetworkPlugin.instance.configuration.chat
-    private val channel = messenger.getChannel<PlayerMessage>("global-chat-channel")
+    private val config = instance.configuration.chat
+    private val channel = messenger.getChannel<PlayerMessage>("global-chat")
 
     override fun onEnable(consumer: TerminableConsumer) {
-        Events.subscribe(AsyncPlayerChatEvent::class.java, EventPriority.HIGHEST)
-            .filter {
-                it.player.metadata().has(CHAT) && it.player.metadata()
-                    .getOrDefault(CHAT, ChatType.NOT_PRESENT) == ChatType.GLOBAL
-            }
+        registerGlobalChatModeListener(consumer)
+        registerDefaultChatListener(consumer)
+        registerGlobalCommand(consumer)
+        registerGlobalChannelListener(consumer)
+    }
+
+    private fun registerGlobalChatModeListener(consumer: TerminableConsumer) {
+        Events.subscribe(AsyncPlayerChatEvent::class.java, EventPriority.HIGH)
+            .filter { !it.isCancelled }
+            .filter { !isInAdminMode(it.player) }
+            .filter { isInGlobalMode(it.player) }
             .handler {
                 it.isCancelled = true
                 val (uuid, name) = it.player.wrapAsPlayer()
-                channel.sendMessage(
-                    PlayerMessage(
-                        uuid,
-                        name,
-                        it.message,
-                        GammaNetworkPlugin.instance.serverId
-                    )
-                )
-            }.bindWith(consumer)
-        Events.subscribe(AsyncPlayerChatEvent::class.java)
-            .filter { config.enable }
-            .filter {
-                !it.player.metadata().has(CHAT) || it.player.metadata().getOrDefault(
-                    CHAT,
-                    ChatType.NOT_PRESENT
-                ) == ChatType.NOT_PRESENT
+                channel.sendMessage(PlayerMessage(uuid, name, it.message, instance.serverId))
             }
+            .bindWith(consumer)
+    }
+
+    private fun registerDefaultChatListener(consumer: TerminableConsumer) {
+        Events.subscribe(AsyncPlayerChatEvent::class.java, EventPriority.LOWEST)
+            .filter { !it.isCancelled }
+            .filter { config.enable }
+            .filter { !isInAdminMode(it.player) }
+            .filter { !isInGlobalMode(it.player) }
             .handler { event ->
                 event.isCancelled = true
-                var message = event.message
-                val sender = event.player
-                val luckPermsUser = luckPerms.userManager.getUser(sender.uniqueId) ?: return@handler
-                val metadata = luckPermsUser.cachedData.metaData
-                val global = message.isNotEmpty() && message.first() == '!'
-                if (sender.hasPermission("gammachat.chat.admin")) {
-                    message = colorize(config.adminMessageColor.format + message)
-                }
-                if (config.enableSplitting) {
-                    if (global) {
-                        message = message.substring(1)
-                        if (sender.hasPermission("gammachat.chat.admin")) {
-                            message = colorize(config.adminMessageColor.format + message)
-                        }
-                        Bukkit.getConsoleSender().sendMessage(message)
-                        Players.all()
-                            .forEach { p ->
-                                p.sendMessage(
-                                    colorize(
-                                        config.globalFormat.format
-                                            .replace("{suffix}", metadata.suffix ?: "")
-                                            .replace("{prefix}", metadata.prefix ?: "")
-                                            .replace("{username}", sender.name)
-                                    )
-                                        .replace("{message}", message)
-                                )
+                handleDefaultChatMessage(event.player, event.message)
+            }
+            .bindWith(consumer)
+    }
 
-                            }
-                    } else {
-                        val message = colorize(
-                            config.localFormat.format
-                                .replace("{suffix}", metadata.suffix ?: "")
-                                .replace("{prefix}", metadata.prefix ?: "")
-                                .replace("{username}", sender.name)
-                        )
-                            .replace("{message}", message)
-                        Players.all()
-                            .filter { it.location.world.name == sender.location.world.name }
-                            .filter { it.location distance sender.location < config.localChatRadius }
-                            .forEach { player ->
-                                player.sendMessage(message)
-                            }
-                        Bukkit.getConsoleSender().sendMessage(message)
-
-                    }
-                }
-
-            }.bindWith(consumer)
+    private fun registerGlobalCommand(consumer: TerminableConsumer) {
         Commands.create()
             .assertPermission("gammachat.globalchat")
             .assertUsage("[message]")
             .handler {
                 val (uuid, name) = it.sender().wrapAsPlayer()
                 if (it.args().isNotEmpty()) {
-                    val message = it.args().joinToString(" ")
-                    channel.sendMessage(
-                        PlayerMessage(
-                            uuid,
-                            name,
-                            message,
-                            GammaNetworkPlugin.instance.serverId
-                        )
-                    )
-
+                    val text = it.args().joinToString(" ")
+                    channel.sendMessage(PlayerMessage(uuid, name, text, instance.serverId))
                 } else {
-                    val isInGlobalChat = it.sender().metadata().has(CHAT) && it.sender().metadata()
-                        .getOrDefault(CHAT, ChatType.NOT_PRESENT) == ChatType.GLOBAL
-
-                    if (!isInGlobalChat) {
-                        it.sender().metadata().put(CHAT, ChatType.GLOBAL)
-                        it.replyAnnouncement("Глобальный чат включен.")
-                    } else {
-                        it.sender().metadata().put(CHAT, ChatType.NOT_PRESENT)
-                        it.replyAnnouncement("Глобальный чат&c выключен.")
-                    }
+                    toggleGlobalChat(it)
                 }
             }
             .registerAndBind(consumer, "g", "global")
+    }
 
-        channel.newAgent { agent, message ->
+    private fun registerGlobalChannelListener(consumer: TerminableConsumer) {
+        channel.newAgent { _, message ->
             Schedulers.sync().run {
-                val message = colorize("&c[Gamma] &a[${message.server}] ${message.displayName}&f: ${message.message}")
-                Bukkit.getConsoleSender().sendMessage(message)
-                Bukkit.broadcast(
-                    message,
-                    "gammachat.global.notify"
-                )
+                val formatted = colorize("&c[Gamma] &a[${message.server}] ${message.displayName}&f: ${message.message}")
+                Bukkit.getConsoleSender().sendMessage(formatted)
+                Bukkit.broadcast(formatted, "gammachat.global.notify")
             }
         }.bindWith(consumer)
     }
 
+    private fun isInGlobalMode(sender: CommandSender): Boolean {
+        val meta = sender.metadata()
+        return meta.has(CHAT) && meta.getOrDefault(CHAT, ChatType.NOT_PRESENT) == ChatType.GLOBAL
+    }
+
+    private fun isInAdminMode(sender: CommandSender): Boolean {
+        val meta = sender.metadata()
+        return meta.has(CHAT) && meta.getOrDefault(CHAT, ChatType.NOT_PRESENT) == ChatType.ADMIN
+    }
+
+    private fun toggleGlobalChat(ctx: CommandContext<CommandSender>) {
+        val sender = ctx.sender()
+        val nowGlobal = !isInGlobalMode(sender)
+        sender.metadata().put(CHAT, if (nowGlobal) ChatType.GLOBAL else ChatType.NOT_PRESENT)
+        if (nowGlobal) {
+            ctx.replyAnnouncement("Глобальный чат включен.")
+        } else {
+            ctx.replyAnnouncement("Глобальный чат&c выключен.")
+        }
+    }
+
+    private fun handleDefaultChatMessage(sender: Player, rawMessage: String) {
+        val user = luckPerms.userManager.getUser(sender.uniqueId) ?: return
+        val meta = user.cachedData.metaData
+
+        val isGlobal = rawMessage.isNotEmpty() && rawMessage.first() == '!'
+        val text = if (isGlobal) rawMessage.substring(1) else rawMessage
+        val withAdmin = applyAdminColorIfNeeded(sender, text)
+
+        if (!config.enableSplitting) return
+
+        if (isGlobal) {
+            broadcastGlobal(sender, meta.prefix, meta.suffix, withAdmin)
+            publishSpy(SpyType.GLOBAL, sender.name, text)
+        } else {
+            broadcastLocal(sender, meta.prefix, meta.suffix, withAdmin)
+            publishSpy(SpyType.LOCAL, sender.name, text)
+        }
+    }
+
+    private fun applyAdminColorIfNeeded(player: Player, message: String): String {
+        return if (player.hasPermission("gammachat.chat.admin")) {
+            colorize(config.adminMessageColor.format + message)
+        } else {
+            message
+        }
+    }
+
+    private fun broadcastGlobal(sender: Player, prefix: String?, suffix: String?, message: String) {
+        val formatted = buildFormatted(config.globalFormat.format, sender.name, prefix, suffix, message)
+        Players.all().forEach { it.sendMessage(formatted) }
+        Bukkit.getConsoleSender().sendMessage(formatted)
+    }
+
+    private fun broadcastLocal(sender: Player, prefix: String?, suffix: String?, message: String) {
+        val formatted = buildFormatted(config.localFormat.format, sender.name, prefix, suffix, message)
+        Players.all()
+            .filter { it.location.world.name == sender.location.world.name }
+            .filter { it.location distance sender.location < config.localChatRadius }
+            .forEach { it.sendMessage(formatted) }
+        Bukkit.getConsoleSender().sendMessage(formatted)
+    }
+
+    private fun buildFormatted(
+        baseFormat: String,
+        username: String,
+        prefix: String?,
+        suffix: String?,
+        message: String
+    ): String {
+        return colorize(
+            baseFormat
+                .replace("{suffix}", suffix ?: "")
+                .replace("{prefix}", prefix ?: "")
+                .replace("{username}", username)
+        ).replace("{message}", message)
+    }
+
+    private fun publishSpy(type: SpyType, from: String, text: String) {
+        SpyModule.publish(
+            SpyMessage(
+                type = type,
+                from = from,
+                to = null,
+                text = text,
+                server = instance.serverId
+            )
+        )
+    }
 }

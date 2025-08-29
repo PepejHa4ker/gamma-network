@@ -1,5 +1,7 @@
 package com.pepej.gammanetwork.module
 
+import com.pepej.gammanetwork.GammaNetworkPlugin.Companion.instance
+import com.pepej.gammanetwork.commands.Tabs.players
 import com.pepej.gammanetwork.utils.getConversationChannel
 import com.pepej.papi.command.Commands
 import com.pepej.papi.messaging.conversation.ConversationMessage
@@ -9,7 +11,6 @@ import com.pepej.papi.messaging.conversation.ConversationReplyListener.Registrat
 import com.pepej.papi.scheduler.Schedulers
 import com.pepej.papi.terminable.TerminableConsumer
 import com.pepej.papi.text.Text.colorize
-import com.pepej.papi.utils.TabHandlers
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.util.*
@@ -26,6 +27,16 @@ object PrivateMessageSystem : NetworkModule("PrivateMessages") {
                 val player = Bukkit.getPlayerExact(reply.deliveredTo)
                 val name = player?.displayName ?: ("&a" + reply.deliveredTo)
                 from.sendMessage(String.format(colorize("&7[&eВы&7 -> $name&7]&f: ") + "%s", message))
+
+                val spyMsg = SpyMessage(
+                    type = SpyType.PRIVATE,
+                    from = from.name,
+                    to = reply.deliveredTo,
+                    text = message,
+                    server = instance.id
+                )
+                SpyModule.publish(spyMsg)
+
                 return RegistrationAction.STOP_LISTENING
             }
 
@@ -59,7 +70,6 @@ object PrivateMessageSystem : NetworkModule("PrivateMessages") {
         channel.newAgent { _, message ->
             val reply = Schedulers.sync().supply {
                 val player = Bukkit.getPlayer(message.to) ?: return@supply null
-
                 val sender = Bukkit.getPlayerExact(message.from)
                 val displayName = sender?.displayName ?: message.from
                 player.sendMessage(String.format(colorize("&7[&a$displayName&7 -> &eВам&7]&f: ") + "%s", message.message))
@@ -71,9 +81,7 @@ object PrivateMessageSystem : NetworkModule("PrivateMessages") {
         Commands.create()
             .assertPlayer()
             .assertUsage("<player> <message>")
-            .tabHandler { context ->
-                TabHandlers.of(context.arg(0).toString(), *network.onlinePlayers.values.map { it.name.get() }.toTypedArray())
-            }
+            .tabHandler { context -> context.arg(0).players(network) }
             .handler {
                 sendMessage(it.sender(), it.arg(0).parseOrFail(String::class.java), it.args().drop(1).joinToString(" "))
             }
