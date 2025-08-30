@@ -160,6 +160,7 @@ class GammaNetworkRedirectSystem(
         loginEventListener.close()
     }
 
+
     data class RequestMessage(
         val convoId: UUID,
         val targetServer: String,

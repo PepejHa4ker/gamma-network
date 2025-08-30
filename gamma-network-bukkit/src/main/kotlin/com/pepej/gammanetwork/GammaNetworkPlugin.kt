@@ -131,7 +131,7 @@ class GammaNetworkPlugin : PapiJavaPlugin(), RedisProvider, InstanceData {
             server(Commands.parserRegistry(), network)
         }
         bindModule(FindCommandModule(network, arrayOf("find")))
-        bindModule(DispatchModule(redis, this@GammaNetworkPlugin, arrayOf("dispatch", "exec")))
+        bindModule(DispatchModule(network, redis, this@GammaNetworkPlugin, arrayOf("dispatch", "exec")))
         bindModule(NetworkCommands)
         bindModule(RedirectLeaveListenerModule)
         bindModule(ModuleManager)
