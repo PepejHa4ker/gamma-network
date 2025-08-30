@@ -5,3 +5,6 @@
 /gamma-network-api/build/
 /gamma-network-bukkit/build/
 /gamma-network-hub/build/
+.sh
+.bat
+.ps1
