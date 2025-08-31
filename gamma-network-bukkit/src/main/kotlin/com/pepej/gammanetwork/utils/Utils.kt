@@ -24,7 +24,6 @@ import java.util.*
 
 const val GAMMA_RED: String = "&7[&cGamma&7]"
 const val GAMMA_GREEN: String = "&7[&aGamma&7]"
-const val REDIRECT_TOKEN = "redirect-token"
 
 val EMPTY_UUID: UUID = UUID.fromString("00000000-0000-0000-0000-000000000000")
 

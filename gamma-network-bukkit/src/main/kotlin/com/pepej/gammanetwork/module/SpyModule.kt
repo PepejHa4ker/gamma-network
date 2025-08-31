@@ -57,8 +57,8 @@ object SpyModule : NetworkModule("Spy") {
 
                 when (message.type) {
                     SpyType.PRIVATE -> player.sendMessage(colorize("&8[SPY] &7[&a${message.from}&7 -> &e${message.to}&7]&f: ${message.text}"))
-                    SpyType.GLOBAL -> player.sendMessage(colorize("&8[SPY: L] &7${message.from} &a[${message.server}]&f: ${message.text}"))
-                    SpyType.LOCAL -> player.sendMessage(colorize("&8[SPY: G] &7${message.from} &a[${message.server}]&f: ${message.text}"))
+                    SpyType.LOCAL -> player.sendMessage(colorize("&8[SPY: L] &7${message.from} &a[${message.server}]&f: ${message.text}"))
+                    SpyType.GLOBAL -> player.sendMessage(colorize("&8[SPY: G] &7${message.from} &a[${message.server}]&f: ${message.text}"))
                 }
             }
         }.bindWith(consumer)

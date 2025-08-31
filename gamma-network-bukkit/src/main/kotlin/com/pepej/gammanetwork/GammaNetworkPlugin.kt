@@ -9,12 +9,12 @@ import com.pepej.gammanetwork.messenger.GammaNetworkMessenger
 import com.pepej.gammanetwork.messenger.redis.Redis
 import com.pepej.gammanetwork.messenger.redis.RedisCredentials
 import com.pepej.gammanetwork.messenger.redis.RedisProvider
+import com.pepej.gammanetwork.metadata.SharedMetadataRegistrar
 import com.pepej.gammanetwork.module.ModuleManager
 import com.pepej.gammanetwork.network.GammaNetwork
 import com.pepej.gammanetwork.rcon.RconServer
 import com.pepej.gammanetwork.redirect.GammaNetworkRedirectSystem
 import com.pepej.gammanetwork.redirect.GammaNetworkRequestHandler
-import com.pepej.gammanetwork.redirect.RedirectLeaveListenerModule
 import com.pepej.gammanetwork.redirect.RedirectNetworkMetadataParameterProvider
 import com.pepej.gammanetwork.redirect.VelocityPlayerRedirector
 import com.pepej.papi.ap.Plugin
@@ -101,7 +101,6 @@ class GammaNetworkPlugin : PapiJavaPlugin(), RedisProvider, InstanceData {
 
         _globalCredentials = RedisCredentials.fromConfig(config)
         _redis = getRedis(_globalCredentials)
-
         provideService(RedisProvider::class.java, this@GammaNetworkPlugin)
         provideService(RedisCredentials::class.java, _globalCredentials)
         provideService(Messenger::class.java, redis)
@@ -130,10 +129,10 @@ class GammaNetworkPlugin : PapiJavaPlugin(), RedisProvider, InstanceData {
             profile(Commands.parserRegistry(), network)
             server(Commands.parserRegistry(), network)
         }
+        SharedMetadataRegistrar.register()
         bindModule(FindCommandModule(network, arrayOf("find")))
         bindModule(DispatchModule(network, redis, this@GammaNetworkPlugin, arrayOf("dispatch", "exec")))
         bindModule(NetworkCommands)
-        bindModule(RedirectLeaveListenerModule)
         bindModule(ModuleManager)
         if (configuration.rcon.enable) {
             val rconServer = RconServer(server, configuration.rcon)

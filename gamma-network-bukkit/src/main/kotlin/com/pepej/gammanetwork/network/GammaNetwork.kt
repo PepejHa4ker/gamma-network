@@ -36,6 +36,8 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
+import kotlin.jvm.optionals.getOrDefault
+import kotlin.jvm.optionals.getOrNull
 import kotlin.math.abs
 
 open class GammaNetwork(protected val messenger: Messenger, protected val instanceData: InstanceData) : Network {
@@ -187,6 +189,12 @@ open class GammaNetwork(protected val messenger: Messenger, protected val instan
     override fun getServer(id: String): Server? {
         return servers[id]
     }
+
+    fun findPlayerByName(name: String): Profile? = onlinePlayers.values.find { it.name.get().equals(name, ignoreCase = true) }
+
+    fun findPlayerByUUID(uuid: UUID): Profile? = onlinePlayers[uuid]
+
+    fun nameByUUID(uuid: UUID): String = onlinePlayers[uuid]?.name?.getOrNull() ?: "Unknown"
 
     override fun getOnlinePlayers(): Map<UUID, Profile> {
         val players: MutableMap<UUID?, Profile> = mutableMapOf()

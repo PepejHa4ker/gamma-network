@@ -1,9 +1,7 @@
 package com.pepej.gammanetwork.redirect
 
 import com.google.gson.JsonElement
-import com.pepej.gammanetwork.utils.REDIRECT_TOKEN
 import com.pepej.papi.events.Events
-import com.pepej.papi.gson.GsonProvider
 import com.pepej.papi.messaging.InstanceData
 import com.pepej.papi.messaging.Messenger
 import com.pepej.papi.messaging.conversation.ConversationMessage
@@ -49,7 +47,6 @@ class GammaNetworkRedirectSystem(
                     log.debug("Not allowed")
                     return@thenAcceptAsync
                 }
-                // add player to the expected players queue
                 expectedPlayers[message.uuid] = resp
 
             }
@@ -95,12 +92,6 @@ class GammaNetworkRedirectSystem(
         profile: Profile,
         params: MutableMap<String, JsonElement>
     ): Promise<RedirectSystem.ReceivedResponse> {
-        if (!params.containsKey(REDIRECT_TOKEN)) {
-            val token = UUID.randomUUID().toString()
-            params[REDIRECT_TOKEN] = GsonProvider.standard().toJsonTree(token)
-            log.debug("Generated redirect token {} for player {}", token, profile.uniqueId)
-        }
-
         val req = RequestMessage(
             UUID.randomUUID(),
             serverId,
@@ -120,7 +111,7 @@ class GammaNetworkRedirectSystem(
         val promise = Promise.empty<RedirectSystem.ReceivedResponse>()
 
         log.debug("Sending request {}", req)
-        // send req and await reply.
+        // send req and await a reply.
         channel.sendMessage(req, object : ConversationReplyListener<ResponseMessage> {
             override fun onReply(reply: ResponseMessage): ConversationReplyListener.RegistrationAction {
                 log.debug("Got reply {}", reply)
